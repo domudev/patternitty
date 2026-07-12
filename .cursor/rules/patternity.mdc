@@ -20,7 +20,7 @@ patterns" here:
    add commit signal to `.patternity/signal.jsonl` too.
 2. Read that file plus recent conversation, match against existing patterns
    (bump `occurrences`/`state`) or create new `noticed` ones, following
-   `patterns/_SCHEMA.md`, and regenerate `WALKING_DOC.md`.
+   `patterns/_SCHEMA.md`.
 3. If anything newly reached `adopted`, immediately run
    `uv run <patternity-repo>/scripts/compile.py` — don't wait for approval,
    just report what changed afterward.

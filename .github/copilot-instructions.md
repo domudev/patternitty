@@ -13,7 +13,7 @@ placeholder has been pointed at a patternity clone. If asked to "run
 patternity" here: also mine `.patternity/signal.jsonl` via
 `uv run <patternity-repo>/scripts/mine_git_history.py`, then match that plus
 recent conversation against existing patterns (bump `occurrences`/`state`)
-or create new `noticed` ones, and regenerate `WALKING_DOC.md`. If anything
+or create new `noticed` ones. If anything
 newly reached `adopted`, immediately run
 `uv run <patternity-repo>/scripts/compile.py` and report what changed.
 
