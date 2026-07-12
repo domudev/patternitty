@@ -6,7 +6,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write   # release job needs to create tags + releases
+  contents: read
 
 jobs:
   test:
@@ -20,29 +20,3 @@ jobs:
             echo "== $t =="
             uv run "$t"
           done
-
-  # version-driven release: the source of truth is .claude-plugin/plugin.json.
-  # On a push to main, if that version has no release yet, tag it and cut a
-  # GitHub Release with auto-generated notes. Idempotent — pushes that don't
-  # bump the version just skip.
-  release:
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - id: ver
-        run: echo "tag=v$(python3 -c "import json;print(json.load(open('.claude-plugin/plugin.json'))['version'])")" >> "$GITHUB_OUTPUT"
-      - name: Release if the version is new
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="${{ steps.ver.outputs.tag }}"
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "release $TAG already exists — nothing to do"
-            exit 0
-          fi
-          echo "cutting release $TAG"
-          gh release create "$TAG" --target "$GITHUB_SHA" --title "patternity $TAG" --generate-notes

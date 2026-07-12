@@ -1,0 +1,20 @@
+name: release-please
+
+# Trunk-based releases from Conventional Commits: this keeps a rolling
+# "release" PR that bumps the version (plugin.json + CHANGELOG); merging that
+# PR tags and cuts the GitHub Release. No manual version bumping.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
