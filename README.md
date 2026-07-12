@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="viz/logo.svg" width="230" alt="patternity">
+  <img src="viz/logo.svg" width="52" alt="patternity">
+  <br><br>
+  <b>patternity</b>
+  <br>
+  <sub>DRY for your preferences. Scream at your agent once; it does the nagging from then on.</sub>
 </p>
 
 # You are lazy. That's the feature.
