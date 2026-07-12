@@ -123,9 +123,11 @@
   .actions { position: absolute; top: 11px; right: 11px; display: flex; gap: 5px; opacity: 0; transition: opacity .12s ease; }
   .card:hover .actions, .card:focus-within .actions, .actions:focus-within { opacity: 1; }
   .act { width: 24px; height: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text-secondary); font-size: 13px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
-  .act:hover { border-color: var(--border-strong); color: var(--text-primary); }
+  /* intent up front: accept reads green, reject reads rose, even before click */
+  .act[data-act="accept"]:hover { border-color: var(--adopted); color: var(--adopted); }
+  .act[data-act="reject"]:hover { border-color: var(--rejected); color: var(--rejected); }
   .act.on-accept { background: var(--adopted); border-color: var(--adopted); color: #06210f; }
-  .act.on-reject { background: var(--override); border-color: var(--override); color: #14101f; }
+  .act.on-reject { background: var(--rejected); border-color: var(--rejected); color: #1a0e12; }
 
   .chip {
     font-size: 10px; padding: 3px 8px; border-radius: var(--radius); border: 1px solid var(--border);
@@ -180,6 +182,10 @@
   .tray code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px; color: var(--text-primary); background: rgba(255,255,255,0.06); padding: 6px 9px; border-radius: var(--radius); flex: 1; min-width: 200px; overflow-x: auto; white-space: nowrap; }
   .tray button { font-family: inherit; font-size: 12px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--card); color: var(--text-primary); padding: 7px 12px; cursor: pointer; }
   .tray button:hover { background: var(--card-hover); }
+  #tray-copy { border-color: color-mix(in srgb, var(--adopted) 45%, var(--border-strong)); color: var(--adopted); }
+  #tray-copy:hover { background: color-mix(in srgb, var(--adopted) 14%, transparent); }
+  #tray-clear { color: var(--rejected); }
+  #tray-clear:hover { background: color-mix(in srgb, var(--rejected) 14%, transparent); }
 
   /* bottom drawer (native <dialog> restyled as a bottom sheet — keeps Esc,
      backdrop, and focus-trap for free). Carries the pattern's state accent,
@@ -215,10 +221,15 @@
   dialog#detail #d-target { white-space: pre-wrap; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
   dialog#detail .chips { margin-top: 18px; display: flex; gap: 7px; flex-wrap: wrap; }
   dialog#detail .drawer-actions { margin-top: 20px; display: flex; gap: 10px; }
-  .btn { font-family: inherit; font-size: 13px; font-weight: 500; border-radius: var(--radius); padding: 9px 16px; cursor: pointer; border: 1px solid var(--border-strong); background: var(--card); color: var(--text-primary); }
+  .btn { font-family: inherit; font-size: 13px; font-weight: 600; border-radius: var(--radius); padding: 9px 16px; cursor: pointer; border: 1px solid var(--border-strong); background: var(--card); color: var(--text-primary); }
   .btn:hover { background: var(--card-hover); }
+  /* colored to intent even when unselected; solid fill once chosen */
+  .btn.accept { border-color: color-mix(in srgb, var(--adopted) 45%, var(--border-strong)); color: var(--adopted); }
+  .btn.accept:hover { background: color-mix(in srgb, var(--adopted) 14%, transparent); }
   .btn.accept.active { background: var(--adopted); border-color: var(--adopted); color: #06210f; }
-  .btn.reject.active { background: var(--override); border-color: var(--override); color: #14101f; }
+  .btn.reject { border-color: color-mix(in srgb, var(--rejected) 45%, var(--border-strong)); color: var(--rejected); }
+  .btn.reject:hover { background: color-mix(in srgb, var(--rejected) 14%, transparent); }
+  .btn.reject.active { background: var(--rejected); border-color: var(--rejected); color: #1a0e12; }
 </style>
 </head>
 <body>
