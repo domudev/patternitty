@@ -1,3 +1,0 @@
-{"source": "claude-stop-hook", "user": "nah full rename. either that or nothing. rest is just divert", "assistant": "Not pytest \u2014 they're plain `uv run` self-check scripts. Running them the documented way:", "ts": 1783896406.139144}
-{"source": "claude-stop-hook", "user": "pushed? local rename ?", "assistant": "Local only. I didn't commit or push \u2014 changes are sitting in the working tree of the `patternitty` repo, unstaged.", "ts": 1783896446.1690612}
-{"source": "claude-stop-hook", "user": "renamed it in gh as well", "assistant": "GitHub auto-redirects the old URL, but let's point the remote at the new name so nothing relies on the redirect.", "ts": 1783896479.409027}

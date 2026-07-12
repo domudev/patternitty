@@ -1,4 +1,6 @@
 .patternitty/
+# legacy misspelling — a pre-rename session's hook may still write here
+.patternity/
 __pycache__/
 *.pyc
 .DS_Store
