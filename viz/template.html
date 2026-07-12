@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <title>patternity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
   /* three distinct pastel hues, one per state — a small fixed scale with
      reserved meaning (not-yet-sure -> warming up -> confirmed), each still a
@@ -19,33 +22,52 @@
     --text-muted: #898781;
     --border: rgba(11,11,11,0.10);
     --radius: 10px;
-    --observed-bg: hsl(210 35% 94%);  /* pale slate-blue: just spotted */
-    --suspect-bg:  hsl(35 65% 90%);   /* pale amber: warming up */
-    --proven-bg:   hsl(140 40% 90%);  /* pale green: confirmed */
+    --observed-bg: hsl(210 60% 88%);  /* slate-blue: just spotted */
+    --suspect-bg:  hsl(32 85% 80%);   /* amber: warming up */
+    --proven-bg:   hsl(142 55% 80%);  /* green: confirmed */
   }
+  /* dark "pastel" = desaturated + dark, not light+low-saturation (that
+     would wash out against a light page, not a dark one) — re-stepped for
+     the dark surface, not reused as-is. Applies on OS dark preference by
+     default, or when the toggle below sets data-theme explicitly — either
+     way is a real dark mode, not just an unstyled fallback. */
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --page: #0d0d0d;
       --surface-1: #1a1a19;
       --text-primary: #ffffff;
       --text-secondary: #c3c2b7;
       --text-muted: #898781;
-      --border: rgba(255,255,255,0.12);
-      /* dark "pastel" = desaturated + dark, not light+low-saturation (that
-         would wash out against a light page, not a dark one) — same hues,
-         re-stepped for the dark surface rather than reused as-is. */
-      --observed-bg: hsl(210 20% 18%);
-      --suspect-bg:  hsl(35 30% 20%);
-      --proven-bg:   hsl(140 22% 18%);
+      --border: rgba(255,255,255,0.14);
+      --observed-bg: hsl(210 40% 26%);
+      --suspect-bg:  hsl(32 55% 28%);
+      --proven-bg:   hsl(142 40% 24%);
     }
+  }
+  :root[data-theme="dark"] {
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --border: rgba(255,255,255,0.14);
+    --observed-bg: hsl(210 40% 26%);
+    --suspect-bg:  hsl(32 55% 28%);
+    --proven-bg:   hsl(142 40% 24%);
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--page); color: var(--text-primary); }
   header { padding: 28px 32px 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-  h1 { font-size: 17px; margin: 0 0 4px; font-weight: 600; }
+  /* handwriting accent on the title only — a data board still needs a plain
+     legible sans everywhere else, this is a flourish, not the UI font. If
+     the font fails to load (offline), 'cursive' is a reasonable fallback. */
+  h1 { font-family: 'Caveat', cursive; font-size: 30px; margin: 0; font-weight: 600; line-height: 1; }
   .sub { color: var(--text-secondary); font-size: 13px; margin: 0; }
   .search { border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); color: var(--text-primary); padding: 7px 10px; font-size: 13px; min-width: 220px; font-family: inherit; }
   .search:focus { outline: 2px solid var(--text-muted); outline-offset: 2px; }
+  .controls { display: flex; align-items: center; gap: 8px; }
+  .theme-toggle { border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); color: var(--text-primary); width: 32px; height: 32px; font-size: 14px; cursor: pointer; }
+  .theme-toggle:hover { background: var(--page); }
   .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 0 32px 32px; align-items: start; }
   @media (max-width: 720px) { .board { grid-template-columns: 1fr; } }
   .col { border-top: 2px solid var(--border); padding-top: 12px; }
@@ -53,6 +75,10 @@
   .col h2 .n { color: var(--text-muted); font-weight: 400; }
   .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 8px; cursor: pointer; outline: 2px solid transparent; outline-offset: 0; transition: outline-color .12s ease, outline-offset .12s ease; }
   .card:hover, .card:focus-visible { outline-color: var(--text-secondary); outline-offset: 4px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .card { animation: rise-in .3s ease both; }
+  }
+  @keyframes rise-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
   .card.observed { background: var(--observed-bg); }
   .card.suspect { background: var(--suspect-bg); }
   .card.proven { background: var(--proven-bg); }
@@ -65,7 +91,11 @@
   .dots { display: flex; gap: 3px; }
   .dots .p { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); opacity: .35; }
   .dots .p.on { opacity: 1; }
-  .badge { font-size: 10.5px; padding: 2px 8px; border-radius: 999px; background: rgba(250,178,25,0.22); color: var(--text-primary); }
+  /* solid, not a tinted overlay — a translucent color reads differently on
+     each of the three state backgrounds, so it can't be legible on all of
+     them at once; a fixed solid/inverse pair always contrasts regardless
+     of the card underneath. */
+  .badge { font-size: 10.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--text-primary); color: var(--surface-1); }
   .empty { color: var(--text-muted); font-size: 12px; font-style: italic; }
   .more { display: block; width: 100%; margin-top: 4px; padding: 8px; border: 1px dashed var(--border); border-radius: 6px; background: none; color: var(--text-secondary); font-size: 12px; font-family: inherit; cursor: pointer; }
   .more:hover { background: var(--surface-1); }
@@ -91,7 +121,10 @@
     <h1>patternity</h1>
     <p class="sub">what it's noticed about how you work, from first sighting to something it now assumes.</p>
   </div>
-  <input class="search" id="search" type="search" placeholder="search patterns…" autocomplete="off">
+  <div class="controls">
+    <input class="search" id="search" type="search" placeholder="search patterns…" autocomplete="off">
+    <button class="theme-toggle" id="theme-toggle" aria-label="toggle dark mode" title="toggle dark mode"></button>
+  </div>
 </header>
 <div class="profile" id="profile" hidden></div>
 <div class="board" id="board">
@@ -129,7 +162,7 @@
 
   const STATE_LABEL = { observed: 'Noticed', suspect: 'Recurring', proven: 'Adopted' };
 
-  function card(p, index) {
+  function card(p, index, delayStep) {
     const occ = Math.min(parseInt(p.occurrences, 10) || 0, 3);
     const dots = [1, 2, 3].map(i => `<span class="p${i <= occ ? ' on' : ''}"></span>`).join('');
     const at = p.applies_to || {};
@@ -137,7 +170,7 @@
     const badge = p.type === 'override' ? '<span class="badge">overrides another rule</span>' : '';
     const why = (p.body || '').split('\n').find(l => l.trim()) || '';
     const tag = p.cluster ? `<span class="chip">${escapeHtml(p.cluster)}</span>` : '';
-    return `<div class="card ${p.state}" data-index="${index}" tabindex="0">
+    return `<div class="card ${p.state}" data-index="${index}" tabindex="0" style="animation-delay:${delayStep * 30}ms">
       <div class="top"><span class="name">${escapeHtml(p.name)}</span>${tag}</div>
       <div class="why">${escapeHtml(why)}</div>
       <div class="foot">
@@ -155,7 +188,7 @@
       col.querySelector('h2 .n').textContent = items.length;
       const visible = items.slice(0, shown[state]);
       const cardsHtml = visible.length
-        ? visible.map(p => card(p, DATA.indexOf(p))).join('')
+        ? visible.map((p, i) => card(p, DATA.indexOf(p), i)).join('')
         : '<div class="empty">nothing here yet</div>';
       const moreHtml = items.length > visible.length
         ? `<button class="more" data-state="${state}">show ${Math.min(PAGE_SIZE, items.length - visible.length)} more (${items.length - visible.length} left)</button>`
@@ -224,6 +257,22 @@
   }
   document.getElementById('d-close').addEventListener('click', () => detail.close());
   detail.addEventListener('click', e => { if (e.target === detail) detail.close(); });
+
+  // explicit toggle, persisted — don't just rely on OS preference, which is
+  // invisible unless someone already has it set and knows to look for it.
+  const THEME_KEY = 'patternity-theme';
+  const themeBtn = document.getElementById('theme-toggle');
+  function currentTheme() {
+    return document.documentElement.getAttribute('data-theme')
+      || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(THEME_KEY, theme);
+    themeBtn.textContent = theme === 'dark' ? '☀' : '🌙';
+  }
+  themeBtn.addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
+  setTheme(localStorage.getItem(THEME_KEY) || currentTheme());
 
   renderProfile(PROFILE_MD);
   render();

@@ -47,9 +47,9 @@ stateDiagram-v2
         no manual approval step.
     end note
 
-    classDef observedStyle fill:#fef3c7,stroke:#d97706,color:#78350f
-    classDef suspectStyle fill:#fde68a,stroke:#b45309,color:#78350f
-    classDef provenStyle fill:#bbf7d0,stroke:#15803d,color:#14532d
+    classDef observedStyle fill:#dbe9fb,stroke:#5c8fc9,color:#1f3a5c
+    classDef suspectStyle fill:#fde8b8,stroke:#c9932e,color:#5c4110
+    classDef provenStyle fill:#c7e8d3,stroke:#3f9c66,color:#1c4a30
     class observed observedStyle
     class suspect suspectStyle
     class proven provenStyle
@@ -133,9 +133,21 @@ open ~/.patternity/patterns/index.html   # macOS; xdg-open on Linux
 anything else you want to build on top (a CLI summary, a different view).
 Each state gets its own pastel wash (slate → amber → green) rather than one
 hue at different lightness, so the board reads at a glance instead of
-requiring you to compare shades; `type: override` patterns get a small badge
-instead of a recolored card, since it's a different variable. Occurrence
-count shows as three small dots, filled up to the pattern's count.
+requiring you to compare shades; `type: override` patterns get a small solid
+badge (not a tinted overlay, so it stays legible regardless of which state's
+background it sits on) instead of a recolored card, since it's a different
+variable. Occurrence count shows as three small dots, filled up to the
+pattern's count. `cluster` shows as a small chip on the card itself.
+Clicking a card (or Enter/Space when it's focused) opens a detail view with
+the full body text, not just the truncated first line — useful once a
+pattern's "why" runs longer than one line, or for reading an override's full
+suppressed-text target.
+
+Dark mode is an explicit toggle in the header (persisted per-browser via
+`localStorage`), seeded from the OS preference on first load rather than
+silently depending on it — open the file once and you'll always have a
+visible way to switch, whether or not you knew your OS was already in dark
+mode.
 
 If `${PATTERNITY_HOME:-~/.patternity}/patterns/PROFILE.md` exists, it's
 rendered as a summary panel above the board — the skill's synthesis of
