@@ -4,11 +4,11 @@ description: >
   Distills captured session signal (.patternity/signal.jsonl, from the Stop/
   prompt-submit hooks and git-history mining) into a personal, cross-project
   pattern store at ${PATTERNITY_HOME:-~/.patternity}/patterns/, promotes
-  patterns through observed -> suspect -> proven as they recur, clusters them
-  into a synthesized PROFILE.md, and compiles proven ones into
+  patterns through noticed -> recurring -> adopted as they recur, clusters them
+  into a synthesized PROFILE.md, and compiles adopted ones into
   CLAUDE.md/AGENTS.md/.cursor/.github instructions right away. Use when the
   user says "patternity", "/patternity", "learn my patterns",
-  "distill patterns", or asks what patternity has observed/proven/learned
+  "distill patterns", or asks what patternity has noticed/adopted/learned
   about them. Also use proactively at the start of a session if
   .patternity/signal.jsonl has grown substantially since the walking doc was
   last updated. Do NOT use for one-off requests already stated explicitly —
@@ -52,7 +52,7 @@ keeps frontmatter valid and the occurrence ladder consistent:
   check whether a matching pattern already exists before creating a new one.
 - `patternity.py get <name> --json`, `list [--state/--cluster] --json`.
 - `patternity.py add <name> --type … --cluster … --body "…"` to create a new
-  `observed` pattern; `bump <name>` to increment occurrences and re-derive
+  `noticed` pattern; `bump <name>` to increment occurrences and re-derive
   state; `set <name> <field> <value>` for other frontmatter edits.
 If Python isn't available, the files are plain markdown — read/grep/edit them
 directly (same result; the CLI is just sugar over the file format). Whichever
@@ -63,9 +63,9 @@ For each piece of signal:
 
 1. Check whether it matches an existing pattern file (same underlying
    preference, possibly worded differently). If yes, bump `occurrences` and
-   re-derive `state`: 1 -> `observed`, 2 -> `suspect`, 3+ -> `proven`. An
+   re-derive `state`: 1 -> `noticed`, 2 -> `recurring`, 3+ -> `adopted`. An
    explicit standing statement ("always...", "never...", "from now on...")
-   goes straight to `proven` regardless of count — it isn't an inference
+   goes straight to `adopted` regardless of count — it isn't an inference
    that needs corroborating. **Exception:** if the matched pattern has
    `decision: rejected`, leave it alone entirely — don't bump `occurrences`,
    don't change `state`, don't resurrect it. The user tombstoned it on
@@ -74,14 +74,14 @@ For each piece of signal:
    for the record, but never demote it.)
 2. If no, and the signal is a genuine correction/confirmation (not a one-off
    already fully explicit in that same message), create a new pattern file
-   at `state: observed`, `occurrences: 1`.
+   at `state: noticed`, `occurrences: 1`.
 3. If the signal targets suppressing another plugin's rule the user finds
    annoying (a different SKILL.md, a `.cursor/rules/*.mdc` line, a
    `.github/copilot-instructions.md` line), set `type: override` and copy
    the exact offending text into `target` verbatim — the compiler does
    literal text matching, not fuzzy matching, so precision here matters more
    than for additive patterns. Explicit override requests go straight to
-   `proven` too, same rule as above.
+   `adopted` too, same rule as above.
 4. Use `applies_to.project` to scope narrowly (the observing project's name)
    until a pattern has shown up in more than one project — don't default a
    single-project observation to `project: "*"`.
@@ -90,19 +90,19 @@ For each piece of signal:
    if nothing fits. This is what turns a pile of rules into a profile — see
    "Clustering into a profile" in `patterns/_SCHEMA.md`.
 6. Rewrite `WALKING_DOC.md` to reflect the current state of every pattern,
-   and `PROFILE.md` to reflect the current clusters (group proven patterns
+   and `PROFILE.md` to reflect the current clusters (group adopted patterns
    under a `## <cluster>` heading each, with a sentence or two of synthesis,
    not just a re-listing of pattern bullets).
 7. The store self-initializes — `patternity.py add`/`compile.py`/etc. create
    the directory and git-init it on first write, so there's no separate init
    step and no "store not initialized" dead-end. After writing, commit the
-   change there: `git -C "${PATTERNITY_HOME:-$HOME/.patternity}" add -A && git -C "${PATTERNITY_HOME:-$HOME/.patternity}" commit -m "<name>: <observed|suspect|proven> (n=<occurrences>)"`.
+   change there: `git -C "${PATTERNITY_HOME:-$HOME/.patternity}" add -A && git -C "${PATTERNITY_HOME:-$HOME/.patternity}" commit -m "<name>: <noticed|recurring|adopted> (n=<occurrences>)"`.
    Local commit only — never push, that's a separate, user-initiated step
    (see README "Backing up your pattern store").
 
 ## Dynamic reflection
 
-If any pattern newly reached `proven` in this pass, immediately run
+If any pattern newly reached `adopted` in this pass, immediately run
 `uv run <patternity-repo>/scripts/compile.py` from the current project's
 root — don't wait for the user to ask, and don't ask them to approve first.
 That's what keeps CLAUDE.md/AGENTS.md/`.cursor/rules`/`.github/instructions`

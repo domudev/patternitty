@@ -32,7 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _lib import ensure_store, load_all, parse_pattern, patterns_dir, set_field  # noqa: E402
 
-LADDER = [(3, "proven"), (2, "suspect"), (0, "observed")]  # occurrences -> state
+LADDER = [(3, "adopted"), (2, "recurring"), (0, "noticed")]  # occurrences -> state
 
 
 def searchable(p: dict) -> str:
@@ -119,13 +119,13 @@ def cmd_add(args) -> int:
         return 1
     body = args.body or (sys.stdin.read().strip() if not sys.stdin.isatty() else "")
     fm = [
-        f"name: {args.name}", f"type: {args.type}", "state: observed", "occurrences: 1",
+        f"name: {args.name}", f"type: {args.type}", "state: noticed", "occurrences: 1",
         *([f"cluster: {args.cluster}"] if args.cluster else []),
         "applies_to:", f"  tool: \"{args.tool}\"", "  glob: \"**/*\"", f"  project: \"{args.project}\"",
         *(["target: null"] if args.type == "override" else []),
     ]
     path.write_text("---\n" + "\n".join(fm) + "\n---\n\n" + body + "\n")
-    print(f"added {args.name} (observed)")
+    print(f"added {args.name} (noticed)")
     return 0
 
 

@@ -8,7 +8,7 @@ alwaysApply: false
 Patterns learned about this user live at
 `${PATTERNITY_HOME:-~/.patternity}/patterns/` (see `patterns/_SCHEMA.md` in
 the patternity repo), not in this project. Patterns that reached `state:
-proven` are already compiled into `.cursor/rules/patternity-learned.mdc` —
+adopted` are already compiled into `.cursor/rules/patternity-learned.mdc` —
 you don't need to read the pattern store directly for those.
 
 A `beforeSubmitPrompt` hook (`.cursor/hooks.json`) already logs every prompt
@@ -19,8 +19,8 @@ patterns" here:
 1. Optionally run `uv run <patternity-repo>/scripts/mine_git_history.py` to
    add commit signal to `.patternity/signal.jsonl` too.
 2. Read that file plus recent conversation, match against existing patterns
-   (bump `occurrences`/`state`) or create new `observed` ones, following
+   (bump `occurrences`/`state`) or create new `noticed` ones, following
    `patterns/_SCHEMA.md`, and regenerate `WALKING_DOC.md`.
-3. If anything newly reached `proven`, immediately run
+3. If anything newly reached `adopted`, immediately run
    `uv run <patternity-repo>/scripts/compile.py` — don't wait for approval,
    just report what changed afterward.

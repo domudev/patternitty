@@ -22,37 +22,37 @@ reflects it into every tool's instructions on its own.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> observed
+    [*] --> noticed
 
-    observed --> suspect: recurs again
-    suspect --> proven: recurs again
-    observed --> proven: explicit "always" / "never"
-    suspect --> proven: explicit "always" / "never"
-    proven --> [*]: compiled automatically
+    noticed --> recurring: recurs again
+    recurring --> adopted: recurs again
+    noticed --> adopted: explicit "always" / "never"
+    recurring --> adopted: explicit "always" / "never"
+    adopted --> [*]: compiled automatically
 
-    note right of observed
+    note right of noticed
         signal captured once
         (hook or git-history mining)
     end note
 
-    note right of suspect
+    note right of recurring
         seen twice, trending
         not compiled yet
     end note
 
-    note right of proven
+    note right of adopted
         3rd+ occurrence, or an explicit
         standing statement.
         compile.py runs immediately,
         no manual approval step.
     end note
 
-    classDef observedStyle fill:#dbe9fb,stroke:#5c8fc9,color:#1f3a5c
-    classDef suspectStyle fill:#fde8b8,stroke:#c9932e,color:#5c4110
-    classDef provenStyle fill:#c7e8d3,stroke:#3f9c66,color:#1c4a30
-    class observed observedStyle
-    class suspect suspectStyle
-    class proven provenStyle
+    classDef noticedStyle fill:#dbe9fb,stroke:#5c8fc9,color:#1f3a5c
+    classDef recurringStyle fill:#fde8b8,stroke:#c9932e,color:#5c4110
+    classDef adoptedStyle fill:#c7e8d3,stroke:#3f9c66,color:#1c4a30
+    class noticed noticedStyle
+    class recurring recurringStyle
+    class adopted adoptedStyle
 ```
 
 1. **Capture** — one shared hook script (`hooks/capture.py`) appends raw
@@ -71,15 +71,15 @@ stateDiagram-v2
    `.patternity/signal.jsonl` and matches it against your personal pattern
    store at `${PATTERNITY_HOME:-~/.patternity}/patterns/` (outside any repo's
    git history — this is about you, not one project). Matching signal bumps
-   a pattern's `occurrences`; new signal creates one at `state: observed`.
-3. **Promote** — patterns climb `observed` (1) → `suspect` (2) → `proven`
+   a pattern's `occurrences`; new signal creates one at `state: noticed`.
+3. **Promote** — patterns climb `noticed` (1) → `recurring` (2) → `adopted`
    (3+) purely by recurrence. An explicit standing statement ("always...",
-   "never...") skips straight to `proven` — it isn't an inference that needs
+   "never...") skips straight to `adopted` — it isn't an inference that needs
    corroborating. There's no manual approval step; the safety net is that
    every promotion lands as a visible, revertible git diff on the *compiled*
    files, not a pre-compile review queue.
-4. **Compile** — the instant a pattern reaches `proven`, the skill runs
-   `scripts/compile.py`, which renders every proven pattern into each tool's
+4. **Compile** — the instant a pattern reaches `adopted`, the skill runs
+   `scripts/compile.py`, which renders every adopted pattern into each tool's
    native format for the current project: `AGENTS.md`, `CLAUDE.md`,
    `.cursor/rules/patternity-learned.mdc`,
    `.github/instructions/patternity-learned.instructions.md`. Deterministic
@@ -118,7 +118,7 @@ gh repo create <you>/patterns --private --source ~/.patternity --remote origin -
 Every `compile.py` run also regenerates
 `${PATTERNITY_HOME:-~/.patternity}/patterns/index.html` — a Kanban-style
 board (Noticed | Recurring | Adopted — display labels only, the underlying
-`state` values are still `observed`/`suspect`/`proven`) of every pattern in
+`state` values are still `noticed`/`recurring`/`adopted`) of every pattern in
 the store, at every state, across every project. It's a single
 self-contained file with the data embedded inline (no server, no
 fetch/CORS issue — just open it), searchable, and paginated per column so
@@ -134,7 +134,7 @@ The board is dark-only (no light theme), with near-square corners. Cards all
 share one neutral elevated surface — state is carried by a crisp accent (a
 glowing left bar, matching progress dots, and a tinted cluster chip), not a
 full-card wash, since low-opacity tints on a near-black surface read muddy.
-The accents run slate (observed) → amber (suspect) → green (proven), a
+The accents run slate (noticed) → amber (recurring) → green (adopted), a
 progression from "barely sure" to "confident". `type: override` patterns get
 a small solid badge in a fourth reserved accent (violet), so it's never
 confused for a state — the app's four-wave logo is those same four accent
@@ -174,7 +174,7 @@ card and clear it (`clear:name`) to hand it back to the automatic ladder.
 
 If `${PATTERNITY_HOME:-~/.patternity}/patterns/PROFILE.md` exists, it's
 rendered as a summary panel above the board — the skill's synthesis of
-proven patterns grouped by `cluster` (tooling, code-style, workflow, ...),
+adopted patterns grouped by `cluster` (tooling, code-style, workflow, ...),
 e.g. "you default to uv over pip/venv, stated across multiple projects".
 That's the "who is this user" digest; the board underneath stays the
 detailed ledger.
@@ -189,7 +189,7 @@ Code / Cursor / Copilot:
 uv run scripts/patternity.py search "testing style"        # BM25, relevance-ranked
 uv run scripts/patternity.py search "TODO|FIXME" --regex    # structural / exact
 uv run scripts/patternity.py get uv-pref --json
-uv run scripts/patternity.py list --state proven --json
+uv run scripts/patternity.py list --state adopted --json
 uv run scripts/patternity.py add lint-on-save --cluster workflow --body "…"
 uv run scripts/patternity.py bump uv-pref                    # +1 occurrence, re-derive state
 uv run scripts/patternity.py set uv-pref decision accepted   # (--clear to remove)
@@ -219,7 +219,7 @@ A pattern can target and suppress a rule from another plugin/instruction
 file that's annoying you, instead of only adding new rules. Set
 `type: override` and `target` to the literal line/snippet you want gone.
 The compiler removes that exact text from the file it appears in once the
-override reaches `proven`; if the text isn't found verbatim (the source
+override reaches `adopted`; if the text isn't found verbatim (the source
 file changed), it's flagged under a `## Overrides (needs manual check)`
 section instead of silently failing. Copilot in particular resolves
 conflicting instructions non-deterministically, so removing the offending
@@ -261,7 +261,7 @@ uv run /path/to/patternity/scripts/mine_git_history.py
 
 # ask your agent to run the patternity skill, e.g.:
 #   /patternity        (or just "distill my patterns")
-# proven patterns compile automatically; check `git diff` in your project
+# adopted patterns compile automatically; check `git diff` in your project
 ```
 
 ## Scope of v0

@@ -8,7 +8,7 @@ of file live there:
 - `WALKING_DOC.md` — the index. One line per pattern, regenerated whenever a
   pattern is added or its state changes:
   `- [name](name.md) — state, N occurrences — one-line hook`
-- `PROFILE.md` — a short narrative synthesis of proven patterns grouped by
+- `PROFILE.md` — a short narrative synthesis of adopted patterns grouped by
   `cluster`, regenerated the same way. Not a new instruction source (that's
   still individual compiled patterns) — this is the human/agent-readable
   "who is this user" summary, shown as a panel in the visualization.
@@ -20,7 +20,7 @@ of file live there:
 ---
 name: kebab-case-slug          # unique, becomes the filename stem
 type: user | feedback | project | reference | override
-state: observed | suspect | proven   # automatic, occurrence-driven
+state: noticed | recurring | adopted   # automatic, occurrence-driven
 occurrences: 1
 cluster: tooling | code-style | workflow | communication | testing | ...
 decision: accepted | rejected        # optional manual override of `state`; omit for automatic
@@ -41,20 +41,20 @@ Rule body in plain prose. State the rule, then:
 
 | occurrences | state    | compiled? |
 |---|---|---|
-| 1 | `observed` | no |
-| 2 | `suspect`  | no |
-| 3+ | `proven`  | yes, automatically |
+| 1 | `noticed` | no |
+| 2 | `recurring`  | no |
+| 3+ | `adopted`  | yes, automatically |
 
 Each time captured signal (`.patternity/signal.jsonl` in whichever project
 you're in, or git history) matches an existing pattern, bump `occurrences`
 and re-evaluate the state — this is the skill's job (`skills/patternity/SKILL.md`),
 not `compile.py`, since deciding "is this the same pattern recurring" needs
 judgment. An explicit standing statement ("always...", "never...", "from now
-on...") skips straight to `proven` regardless of occurrence count — it isn't
+on...") skips straight to `adopted` regardless of occurrence count — it isn't
 an inference that needs corroborating, the user already said it once,
 plainly.
 
-There is no manual confirm step. Once a pattern is `proven`, `compile.py`
+There is no manual confirm step. Once a pattern is `adopted`, `compile.py`
 picks it up the next time it runs, and the skill runs it immediately after
 promoting a pattern in the same turn — that's what keeps CLAUDE.md/AGENTS.md/
 `.cursor/rules`/`.github/instructions` dynamically in sync instead of stale
@@ -68,14 +68,14 @@ The automatic ladder is the default, but the user can override it per
 pattern via `decision`:
 
 - `decision: accepted` — pin it as compiled regardless of occurrence count
-  (e.g. accept a still-`observed` pattern immediately). Never auto-demoted.
+  (e.g. accept a still-`noticed` pattern immediately). Never auto-demoted.
 - `decision: rejected` — tombstone it: never compiled, and the skill must
   **not** re-propose or resurrect it (leave the file so it's remembered as
   rejected; don't bump its `occurrences` or recreate it if the same signal
   recurs). This is how a user says "stop suggesting this."
 - omitted (or `clear`ed) — back to the automatic occurrence-driven state.
 
-`decision` overrides `state` for compilation (`compile.py:is_effective_proven`).
+`decision` overrides `state` for compilation (`compile.py:is_effective_adopted`).
 The visualization's accept/reject buttons don't write the store directly (it's
 a static page) — they emit a `scripts/decide.py accept:NAME reject:NAME`
 command that sets this field.
@@ -83,7 +83,7 @@ command that sets this field.
 ## Fine-grained scoping
 
 `applies_to.project` lets a pattern stay narrow — e.g. a preference only
-observed in one repo (`applies_to: {project: packlist}`) shouldn't leak into
+noticed in one repo (`applies_to: {project: packlist}`) shouldn't leak into
 every other project's CLAUDE.md just because the store is global. Default to
 `"*"` only once a preference has actually shown up across more than one
 project; scope to the observing project until then.
@@ -95,7 +95,7 @@ unrelated rules. There's no fixed enum — the skill picks a short existing
 cluster name when a new pattern fits one, and only mints a new one when
 nothing fits, so the set of clusters stays small and stable (a handful,
 not one per pattern). Whenever clusters change, regenerate `PROFILE.md`:
-group proven patterns under a `## <cluster>` heading each, with a
+group adopted patterns under a `## <cluster>` heading each, with a
 sentence or two of synthesis per cluster, not just a re-listing of the
 pattern bullets — that's the difference between a profile and an index.
 

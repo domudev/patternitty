@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Self-check for scripts/compile.py: proven patterns render, observed/suspect
+"""Self-check for scripts/compile.py: adopted patterns render, noticed/recurring
 patterns don't, project scoping is respected, overrides remove exact-match
 text, and re-running is idempotent (no duplicate marked sections)."""
 import importlib.util
@@ -28,10 +28,10 @@ def main() -> None:
         os.environ["PATTERNITY_HOME"] = home
         patterns = Path(home) / "patterns"
 
-        write(patterns / "proven-one.md", """---
-name: proven-one
+        write(patterns / "adopted-one.md", """---
+name: adopted-one
 type: feedback
-state: proven
+state: adopted
 occurrences: 3
 cluster: tooling
 applies_to:
@@ -49,10 +49,10 @@ You default to uv over pip/venv, stated across multiple projects.
 
 Mentions a literal </script> tag too, which must not break index.html.
 """)
-        write(patterns / "observed-one.md", """---
-name: observed-one
+        write(patterns / "noticed-one.md", """---
+name: noticed-one
 type: feedback
-state: observed
+state: noticed
 occurrences: 1
 applies_to:
   tool: "*"
@@ -66,7 +66,7 @@ Should never appear in compiled output.
         write(patterns / "scoped-elsewhere.md", """---
 name: scoped-elsewhere
 type: feedback
-state: proven
+state: adopted
 occurrences: 5
 applies_to:
   tool: "*"
@@ -80,7 +80,7 @@ Should not leak into a project it wasn't scoped to.
         write(patterns / "override-one.md", """---
 name: override-one
 type: override
-state: proven
+state: adopted
 occurrences: 1
 applies_to:
   tool: "*"
@@ -91,10 +91,10 @@ target: "Always use tabs, never spaces."
 
 Suppress the annoying tabs rule.
 """)
-        write(patterns / "accepted-observed.md", """---
-name: accepted-observed
+        write(patterns / "accepted-noticed.md", """---
+name: accepted-noticed
 type: feedback
-state: observed
+state: noticed
 occurrences: 1
 decision: accepted
 applies_to:
@@ -104,12 +104,12 @@ applies_to:
 target: null
 ---
 
-Accepted despite only being observed once.
+Accepted despite only being noticed once.
 """)
-        write(patterns / "rejected-proven.md", """---
-name: rejected-proven
+        write(patterns / "rejected-adopted.md", """---
+name: rejected-adopted
 type: feedback
-state: proven
+state: adopted
 occurrences: 9
 decision: rejected
 applies_to:
@@ -119,12 +119,12 @@ applies_to:
 target: null
 ---
 
-Rejected even though it reached proven.
+Rejected even though it reached adopted.
 """)
         write(patterns / "script-breakout.md", """---
 name: script-breakout
 type: feedback
-state: observed
+state: noticed
 occurrences: 1
 applies_to:
   tool: "*"
@@ -143,11 +143,11 @@ Mentions a literal </script> tag in prose, which must not break index.html.
         compile_mod.main()
 
         agents = Path("AGENTS.md").read_text()
-        assert "Use uv for python scripts" in agents, "proven pattern missing from AGENTS.md"
-        assert "Should never appear" not in agents, "observed pattern leaked into compiled output"
+        assert "Use uv for python scripts" in agents, "adopted pattern missing from AGENTS.md"
+        assert "Should never appear" not in agents, "noticed pattern leaked into compiled output"
         assert "Should not leak" not in agents, "out-of-scope project pattern leaked in"
-        assert "Accepted despite only being observed" in agents, "decision:accepted should compile even at observed"
-        assert "Rejected even though it reached proven" not in agents, "decision:rejected must never compile"
+        assert "Accepted despite only being noticed" in agents, "decision:accepted should compile even at noticed"
+        assert "Rejected even though it reached adopted" not in agents, "decision:rejected must never compile"
 
         claude = Path("CLAUDE.md").read_text()
         assert "Always use tabs, never spaces." not in claude, "override did not remove target text"
@@ -160,18 +160,18 @@ Mentions a literal </script> tag in prose, which must not break index.html.
 
         index_json = json.loads((Path(home) / "patterns" / "index.json").read_text())
         assert {p["name"] for p in index_json} == {
-            "proven-one", "observed-one", "scoped-elsewhere", "override-one", "script-breakout",
-            "accepted-observed", "rejected-proven",
+            "adopted-one", "noticed-one", "scoped-elsewhere", "override-one", "script-breakout",
+            "accepted-noticed", "rejected-adopted",
         }, "index.json should include every pattern regardless of state, decision, or project scope"
-        assert next(p for p in index_json if p["name"] == "proven-one")["cluster"] == "tooling", \
+        assert next(p for p in index_json if p["name"] == "adopted-one")["cluster"] == "tooling", \
             "cluster field should pass through to index.json"
-        assert next(p for p in index_json if p["name"] == "rejected-proven")["decision"] == "rejected", \
+        assert next(p for p in index_json if p["name"] == "rejected-adopted")["decision"] == "rejected", \
             "decision field should pass through to index.json"
 
         index_html = (Path(home) / "patterns" / "index.html").read_text()
         assert "__PATTERNITY_DATA__" not in index_html, "template placeholder was not substituted"
         assert "__PATTERNITY_PROFILE__" not in index_html, "profile placeholder was not substituted"
-        assert "observed-one" in index_html, "embedded data missing from index.html"
+        assert "noticed-one" in index_html, "embedded data missing from index.html"
         assert "You default to uv" in index_html, "PROFILE.md content missing from index.html"
 
         def tag_content(tag_id: str) -> str:

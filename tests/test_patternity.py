@@ -33,7 +33,7 @@ def main() -> None:
 
         def write(name, body, extra=""):
             (patterns / f"{name}.md").write_text(
-                f"---\nname: {name}\ntype: feedback\nstate: proven\noccurrences: 3\n{extra}"
+                f"---\nname: {name}\ntype: feedback\nstate: adopted\noccurrences: 3\n{extra}"
                 "applies_to:\n  tool: \"*\"\n  glob: \"**/*\"\n  project: \"*\"\n---\n\n" + body + "\n"
             )
 
@@ -49,16 +49,16 @@ def main() -> None:
         out = run(["search", r"cyclomatic", "--regex"])
         assert "small-modules" in out and "uv-tooling" not in out, f"regex over-matched:\n{out}"
 
-        # add creates a valid observed pattern
+        # add creates a valid noticed pattern
         run(["add", "new-thing", "--cluster", "workflow", "--body", "A freshly added pattern."])
         added = (patterns / "new-thing.md").read_text()
-        assert "state: observed" in added and "occurrences: 1" in added and "cluster: workflow" in added
+        assert "state: noticed" in added and "occurrences: 1" in added and "cluster: workflow" in added
 
-        # bump walks the ladder: 1 -> observed already, bump to 2 -> suspect, 3 -> proven
+        # bump walks the ladder: 1 -> noticed already, bump to 2 -> recurring, 3 -> adopted
         run(["bump", "new-thing"])
-        assert "state: suspect" in (patterns / "new-thing.md").read_text(), "bump to 2 should be suspect"
+        assert "state: recurring" in (patterns / "new-thing.md").read_text(), "bump to 2 should be recurring"
         run(["bump", "new-thing"])
-        assert "state: proven" in (patterns / "new-thing.md").read_text(), "bump to 3 should be proven"
+        assert "state: adopted" in (patterns / "new-thing.md").read_text(), "bump to 3 should be adopted"
         assert "occurrences: 3" in (patterns / "new-thing.md").read_text()
 
         # set + clear

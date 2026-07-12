@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Compile proven patterns into each tool's native format, for whichever
+"""Compile adopted patterns into each tool's native format, for whichever
 project you run this from.
 
 Patterns are personal to the user (${PATTERNITY_HOME:-~/.patternity}/patterns/),
@@ -38,9 +38,9 @@ def current_project() -> str:
     return Path.cwd().name
 
 
-def is_effective_proven(p: dict) -> bool:
+def is_effective_adopted(p: dict) -> bool:
     """A pattern compiles if the user explicitly accepted it (pin, regardless
-    of occurrence count) or it reached `proven` on its own — but an explicit
+    of occurrence count) or it reached `adopted` on its own — but an explicit
     reject always wins and excludes it. Manual accept/reject (set in the
     frontmatter's `decision` field, e.g. via scripts/decide.py) overrides the
     automatic occurrence-driven state."""
@@ -49,13 +49,13 @@ def is_effective_proven(p: dict) -> bool:
         return False
     if decision == "accepted":
         return True
-    return p.get("state") == "proven"
+    return p.get("state") == "adopted"
 
 
-def load_proven(project: str) -> tuple[list[dict], list[dict]]:
+def load_adopted(project: str) -> tuple[list[dict], list[dict]]:
     additive, overrides = [], []
     for p in load_all():
-        if not is_effective_proven(p) or not in_scope(p, project):
+        if not is_effective_adopted(p) or not in_scope(p, project):
             continue
         (overrides if p.get("type") == "override" else additive).append(p)
     return additive, overrides
@@ -80,7 +80,7 @@ def replace_marked_section(path: Path, section_body: str, header: str) -> None:
 
 
 def write_markdown_targets(additive: list[dict]) -> list[Path]:
-    body = "\n".join(bullet(p) for p in additive) if additive else "_(none proven yet)_"
+    body = "\n".join(bullet(p) for p in additive) if additive else "_(none adopted yet)_"
     written = []
     for target in (Path("AGENTS.md"), Path("CLAUDE.md")):
         replace_marked_section(target, body, "## Learned patterns (patternity)")
@@ -91,7 +91,7 @@ def write_markdown_targets(additive: list[dict]) -> list[Path]:
 def write_cursor_rule(additive: list[dict]) -> Path:
     globs = ",".join(sorted({p["applies_to"].get("glob", "**/*") for p in additive})) or "**/*"
     always = any(p["applies_to"].get("tool") in ("*", "cursor") for p in additive)
-    body = "\n".join(bullet(p) for p in additive) if additive else "_(none proven yet)_"
+    body = "\n".join(bullet(p) for p in additive) if additive else "_(none adopted yet)_"
     content = (
         "---\n"
         f"description: Patterns learned by patternity\n"
@@ -109,7 +109,7 @@ def write_cursor_rule(additive: list[dict]) -> Path:
 
 def write_copilot_instructions(additive: list[dict]) -> Path:
     globs = ",".join(sorted({p["applies_to"].get("glob", "**/*") for p in additive})) or "**/*"
-    body = "\n".join(bullet(p) for p in additive) if additive else "_(none proven yet)_"
+    body = "\n".join(bullet(p) for p in additive) if additive else "_(none adopted yet)_"
     content = (
         "---\n"
         f"applyTo: \"{globs}\"\n"
@@ -198,7 +198,7 @@ def main() -> None:
         print(f"store is empty ({patterns_dir()}) — dashboard refreshed, nothing to compile yet")
         return
 
-    additive, overrides = load_proven(project)
+    additive, overrides = load_adopted(project)
     applied, unresolved = apply_overrides(overrides)
     written += write_markdown_targets(additive)
     written += [write_cursor_rule(additive), write_copilot_instructions(additive)]

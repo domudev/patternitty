@@ -1,7 +1,7 @@
 ---
 name: example
 type: feedback
-state: observed
+state: noticed
 occurrences: 1
 applies_to:
   tool: "*"

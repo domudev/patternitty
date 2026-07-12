@@ -32,7 +32,7 @@ def main() -> None:
         (patterns / "foo.md").write_text("""---
 name: foo
 type: feedback
-state: observed
+state: noticed
 occurrences: 1
 ---
 
@@ -43,7 +43,7 @@ Body line that must survive edits.
         text = (patterns / "foo.md").read_text()
         assert field(text, "decision") == "accepted", "accept should set decision: accepted"
         assert "Body line that must survive edits." in text, "body must be preserved"
-        assert field(text, "state") == "observed", "other frontmatter fields must be preserved"
+        assert field(text, "state") == "noticed", "other frontmatter fields must be preserved"
 
         decide_mod.main(["reject:foo"])
         assert field((patterns / "foo.md").read_text(), "decision") == "rejected", "reject should overwrite decision"

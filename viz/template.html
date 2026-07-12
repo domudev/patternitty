@@ -9,7 +9,7 @@
 <style>
   /* Dark-only. State carried by a crisp accent (glowing left bar + dots +
      cluster chip), not a full-card tint (muddy on near-black). slate ->
-     amber -> green as observed -> suspect -> proven; override gets a
+     amber -> green as noticed -> recurring -> adopted; override gets a
      reserved fourth hue (violet). Radius is near-zero by request. */
   :root {
     --page: #0b0b0e;
@@ -22,9 +22,9 @@
     --text-muted: #71717a;
     --radius: 2px;
 
-    --observed: #8b95a7;
-    --suspect:  #f4b740;
-    --proven:   #3ddc84;
+    --noticed: #8b95a7;
+    --recurring:  #f4b740;
+    --adopted:   #3ddc84;
     --override: #a78bfa;
     --rejected: #b06a7a;   /* muted rose — "set aside", distinct from the 3 states + override */
 
@@ -73,9 +73,9 @@
   @media (max-width: 760px) { .board { grid-template-columns: 1fr; } }
 
   .col { --accent: var(--text-muted); background: rgba(255,255,255,0.014); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 14px 8px; min-height: 260px; }
-  .col[data-state="observed"] { --accent: var(--observed); }
-  .col[data-state="suspect"]  { --accent: var(--suspect); }
-  .col[data-state="proven"]   { --accent: var(--proven); }
+  .col[data-state="noticed"] { --accent: var(--noticed); }
+  .col[data-state="recurring"]  { --accent: var(--recurring); }
+  .col[data-state="adopted"]   { --accent: var(--adopted); }
   .col h2 {
     font-family: var(--font-hand); font-size: 24px; font-weight: 700; color: var(--text-primary);
     margin: 0 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
@@ -94,14 +94,14 @@
     transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease, opacity .14s ease;
   }
   .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
-  .card.observed { --accent: var(--observed); }
-  .card.suspect  { --accent: var(--suspect); }
-  .card.proven   { --accent: var(--proven); }
+  .card.noticed { --accent: var(--noticed); }
+  .card.recurring  { --accent: var(--recurring); }
+  .card.adopted   { --accent: var(--adopted); }
   .card:hover, .card:focus-visible {
     outline: none; transform: translateY(-2px); background: var(--card-hover);
     border-color: color-mix(in srgb, var(--accent) 45%, var(--border-strong)); box-shadow: 0 8px 26px rgba(0,0,0,0.45);
   }
-  .card.dec-accepted { border-color: color-mix(in srgb, var(--proven) 55%, var(--border)); }
+  .card.dec-accepted { border-color: color-mix(in srgb, var(--adopted) 55%, var(--border)); }
   .card.dec-rejected { opacity: .5; }
   .card.dec-rejected .name { text-decoration: line-through; }
   @media (prefers-reduced-motion: no-preference) {
@@ -122,7 +122,7 @@
   .card:hover .actions, .card:focus-within .actions, .actions:focus-within { opacity: 1; }
   .act { width: 24px; height: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text-secondary); font-size: 13px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
   .act:hover { border-color: var(--border-strong); color: var(--text-primary); }
-  .act.on-accept { background: var(--proven); border-color: var(--proven); color: #06210f; }
+  .act.on-accept { background: var(--adopted); border-color: var(--adopted); color: #06210f; }
   .act.on-reject { background: var(--override); border-color: var(--override); color: #14101f; }
 
   .chip {
@@ -200,7 +200,7 @@
   dialog#detail .drawer-actions { margin-top: 20px; display: flex; gap: 10px; }
   .btn { font-family: inherit; font-size: 13px; font-weight: 500; border-radius: var(--radius); padding: 9px 16px; cursor: pointer; border: 1px solid var(--border-strong); background: var(--card); color: var(--text-primary); }
   .btn:hover { background: var(--card-hover); }
-  .btn.accept.active { background: var(--proven); border-color: var(--proven); color: #06210f; }
+  .btn.accept.active { background: var(--adopted); border-color: var(--adopted); color: #06210f; }
   .btn.reject.active { background: var(--override); border-color: var(--override); color: #14101f; }
 </style>
 </head>
@@ -210,9 +210,9 @@
   <div>
     <div class="brand">
       <svg class="logo" width="34" height="38" viewBox="0 0 32 30" fill="none" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
-        <path d="M5 4 C2 9, 8 13, 5 18 C3 22, 6 24, 5 26" stroke="var(--observed)"/>
-        <path d="M12 4 C15 9, 9 13, 12 18 C14 22, 10 25, 12 26" stroke="var(--suspect)"/>
-        <path d="M19 4 C16 8, 22 12, 19 17 C17 21, 21 24, 19 26" stroke="var(--proven)"/>
+        <path d="M5 4 C2 9, 8 13, 5 18 C3 22, 6 24, 5 26" stroke="var(--noticed)"/>
+        <path d="M12 4 C15 9, 9 13, 12 18 C14 22, 10 25, 12 26" stroke="var(--recurring)"/>
+        <path d="M19 4 C16 8, 22 12, 19 17 C17 21, 21 24, 19 26" stroke="var(--adopted)"/>
         <path d="M26 4 C29 9, 23 14, 26 19 C28 23, 24 25, 26 26" stroke="var(--override)"/>
       </svg>
       <h1>patternity</h1>
@@ -224,9 +224,9 @@
 <div class="dist" id="dist"></div>
 <div class="profile" id="profile" hidden></div>
 <div class="board" id="board">
-  <div class="col" data-state="observed"><h2>Noticed <span class="n"></span></h2><div class="cards"></div></div>
-  <div class="col" data-state="suspect"><h2>Recurring <span class="n"></span></h2><div class="cards"></div></div>
-  <div class="col" data-state="proven"><h2>Adopted <span class="n"></span></h2><div class="cards"></div></div>
+  <div class="col" data-state="noticed"><h2>Noticed <span class="n"></span></h2><div class="cards"></div></div>
+  <div class="col" data-state="recurring"><h2>Recurring <span class="n"></span></h2><div class="cards"></div></div>
+  <div class="col" data-state="adopted"><h2>Adopted <span class="n"></span></h2><div class="cards"></div></div>
 </div>
 <details class="rejected" id="rejected" hidden>
   <summary></summary>
@@ -258,7 +258,7 @@
   const DATA = JSON.parse(document.getElementById('patternity-data').textContent || '[]');
   const PROFILE_MD = JSON.parse(document.getElementById('patternity-profile').textContent || '""');
   const PAGE_SIZE = 6;
-  const shown = { observed: PAGE_SIZE, suspect: PAGE_SIZE, proven: PAGE_SIZE };
+  const shown = { noticed: PAGE_SIZE, recurring: PAGE_SIZE, adopted: PAGE_SIZE };
   let query = '';
   // name -> target decision ('accepted' | 'rejected' | '') for this session,
   // overlaid on the stored decision until applied via decide.py.
@@ -272,7 +272,7 @@
     const at = p.applies_to || {};
     return [p.name, p.body, p.type, p.cluster, at.tool, at.project].filter(Boolean).join(' ').toLowerCase().includes(q);
   }
-  const STATE_LABEL = { observed: 'Noticed', suspect: 'Recurring', proven: 'Adopted' };
+  const STATE_LABEL = { noticed: 'Noticed', recurring: 'Recurring', adopted: 'Adopted' };
   const storedDecision = p => (p.decision === 'accepted' || p.decision === 'rejected') ? p.decision : '';
   const effDecision = p => pending.has(p.name) ? pending.get(p.name) : storedDecision(p);
   // where a card shows: accept -> Adopted, reject -> hidden (rejected tray),
@@ -280,7 +280,7 @@
   function bucket(p) {
     const d = effDecision(p);
     if (d === 'rejected') return 'rejected';
-    if (d === 'accepted') return 'proven';
+    if (d === 'accepted') return 'adopted';
     return p.state;
   }
 
@@ -351,8 +351,8 @@
   // whole-store proportion by bucket (honors pending decisions, so it shifts
   // live as you accept/reject); not search-filtered — it's a store overview.
   const DIST = [
-    ['observed', 'Noticed', 'var(--observed)'], ['suspect', 'Recurring', 'var(--suspect)'],
-    ['proven', 'Adopted', 'var(--proven)'], ['rejected', 'Rejected', 'var(--rejected)'],
+    ['noticed', 'Noticed', 'var(--noticed)'], ['recurring', 'Recurring', 'var(--recurring)'],
+    ['adopted', 'Adopted', 'var(--adopted)'], ['rejected', 'Rejected', 'var(--rejected)'],
   ];
   function renderDist() {
     const counts = Object.fromEntries(DIST.map(([k]) => [k, 0]));
