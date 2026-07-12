@@ -52,9 +52,12 @@ keeps frontmatter valid and the occurrence ladder consistent:
 - `patternity.py search "<topic>"` (BM25, relevance-ranked) or `--regex` —
   check whether a matching pattern already exists before creating a new one.
 - `patternity.py get <name> --json`, `list [--state/--cluster] --json`.
-- `patternity.py add <name> --type … --cluster … --body "…"` to create a new
-  `noticed` pattern; `bump <name>` to increment occurrences and re-derive
-  state; `set <name> <field> <value>` for other frontmatter edits.
+- `patternity.py add <name> --type … --cluster … --agent <harness> --body "…"`
+  to create a new `noticed` pattern (pass `--agent` from the signal `source`:
+  claude-stop-hook→`claude-code`, cursor-prompt-hook→`cursor`,
+  copilot-prompt-hook→`copilot`; author is filled from git automatically);
+  `bump <name>` to increment occurrences and re-derive state; `set <name>
+  <field> <value>` for other frontmatter edits.
 If Python isn't available, the files are plain markdown — read/grep/edit them
 directly (same result; the CLI is just sugar over the file format). Whichever
 you use, the store is the single source of truth — never keep pattern state

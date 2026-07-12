@@ -23,6 +23,7 @@ All commands operate on ${PATTERNITY_HOME:-~/.patternity}/patterns/.
 import argparse
 import json
 import math
+import os
 import re
 import subprocess
 import sys
@@ -30,7 +31,7 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _lib import ensure_store, load_all, parse_pattern, patterns_dir, set_field  # noqa: E402
+from _lib import ensure_store, git_author, load_all, parse_pattern, patterns_dir, set_field  # noqa: E402
 
 LADDER = [(3, "adopted"), (2, "recurring"), (0, "noticed")]  # occurrences -> state
 
@@ -118,14 +119,16 @@ def cmd_add(args) -> int:
         print(f"already exists: {args.name} (use `set`/`bump` to edit)", file=sys.stderr)
         return 1
     body = args.body or (sys.stdin.read().strip() if not sys.stdin.isatty() else "")
+    agent = args.agent or os.environ.get("PATTERNITY_AGENT") or "unknown"
     fm = [
         f"name: {args.name}", f"type: {args.type}", "state: noticed", "occurrences: 1",
         *([f"cluster: {args.cluster}"] if args.cluster else []),
+        f"agent: {agent}", f"author: {git_author()}",   # provenance: which harness / which user
         "applies_to:", f"  tool: \"{args.tool}\"", "  glob: \"**/*\"", f"  project: \"{args.project}\"",
         *(["target: null"] if args.type == "override" else []),
     ]
     path.write_text("---\n" + "\n".join(fm) + "\n---\n\n" + body + "\n")
-    print(f"added {args.name} (noticed)")
+    print(f"added {args.name} (noticed, agent={agent}, author={git_author()})")
     return 0
 
 
@@ -175,7 +178,7 @@ def main(argv: list[str]) -> int:
     s = sub.add_parser("search"); s.add_argument("query"); s.add_argument("--regex", action="store_true"); s.add_argument("--limit", type=int, default=10); s.add_argument("--json", action="store_true"); s.set_defaults(fn=cmd_search)
     g = sub.add_parser("get"); g.add_argument("name"); g.add_argument("--json", action="store_true"); g.set_defaults(fn=cmd_get)
     ls = sub.add_parser("list"); ls.add_argument("--state"); ls.add_argument("--cluster"); ls.add_argument("--json", action="store_true"); ls.set_defaults(fn=cmd_list)
-    a = sub.add_parser("add"); a.add_argument("name"); a.add_argument("--type", default="feedback"); a.add_argument("--cluster"); a.add_argument("--tool", default="*"); a.add_argument("--project", default="*"); a.add_argument("--body"); a.set_defaults(fn=cmd_add)
+    a = sub.add_parser("add"); a.add_argument("name"); a.add_argument("--type", default="feedback"); a.add_argument("--cluster"); a.add_argument("--tool", default="*"); a.add_argument("--project", default="*"); a.add_argument("--agent"); a.add_argument("--body"); a.set_defaults(fn=cmd_add)
     st = sub.add_parser("set"); st.add_argument("name"); st.add_argument("field"); st.add_argument("value", nargs="?"); st.add_argument("--clear", action="store_true"); st.set_defaults(fn=cmd_set)
     b = sub.add_parser("bump"); b.add_argument("name"); b.set_defaults(fn=cmd_bump)
     d = sub.add_parser("dashboard"); d.set_defaults(fn=cmd_dashboard)

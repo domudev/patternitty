@@ -12,6 +12,20 @@ def patterns_dir() -> Path:
     return Path(home) / "patterns"
 
 
+def git_author() -> str:
+    """Who to attribute a pattern to: the git identity if there is one, else
+    'anon'. email over name (more stable); never raises."""
+    for key in ("user.email", "user.name"):
+        try:
+            out = subprocess.run(["git", "config", key], check=False,
+                                 capture_output=True, text=True, timeout=5).stdout.strip()
+        except Exception:
+            out = ""
+        if out:
+            return out
+    return "anon"
+
+
 def ensure_store() -> Path:
     """Make the store exist on first write — no separate `init` step. Creates
     the patterns dir and, best-effort, git-inits the store root so promotions

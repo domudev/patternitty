@@ -159,7 +159,7 @@ def write_viz(all_patterns: list[dict]) -> list[Path]:
     index.html (the same data + PROFILE.md embedded, so it opens via file://
     with no server and no fetch/CORS gotcha)."""
     slim = [
-        {k: p.get(k, "") for k in ("name", "type", "state", "occurrences", "cluster", "decision", "applies_to", "target", "body")}
+        {k: p.get(k, "") for k in ("name", "type", "state", "occurrences", "cluster", "decision", "agent", "author", "applies_to", "target", "body")}
         for p in all_patterns
     ]
     json_path = patterns_dir() / "index.json"

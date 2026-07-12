@@ -420,9 +420,11 @@
     const targetEl = document.getElementById('d-target');
     targetEl.hidden = !hasTarget;
     targetEl.textContent = hasTarget ? p.target : '';
+    const via = [p.agent, p.author].filter(x => x && x !== 'unknown' && x !== 'anon').join(' · ');
     document.getElementById('d-chips').innerHTML = [
       [STATE_LABEL[p.state] || p.state, false], [p.cluster, true],
       [`${p.occurrences || 0} occurrence${p.occurrences == 1 ? '' : 's'}`, false], [scope, false],
+      [via ? `via ${via}` : '', false],
     ].filter(([t]) => Boolean(t)).map(([t, c]) => `<span class="chip${c ? ' cluster' : ''}">${escapeHtml(t)}</span>`).join('');
     const d = effDecision(p);
     document.getElementById('d-accept').classList.toggle('active', d === 'accepted');

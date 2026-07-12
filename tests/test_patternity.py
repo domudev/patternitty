@@ -50,9 +50,11 @@ def main() -> None:
         assert "small-modules" in out and "uv-tooling" not in out, f"regex over-matched:\n{out}"
 
         # add creates a valid noticed pattern
-        run(["add", "new-thing", "--cluster", "workflow", "--body", "A freshly added pattern."])
+        run(["add", "new-thing", "--cluster", "workflow", "--agent", "claude-code", "--body", "A freshly added pattern."])
         added = (patterns / "new-thing.md").read_text()
         assert "state: noticed" in added and "occurrences: 1" in added and "cluster: workflow" in added
+        assert "agent: claude-code" in added, "add should record the capturing agent"
+        assert "author:" in added, "add should record an author (git identity or anon)"
 
         # bump walks the ladder: 1 -> noticed already, bump to 2 -> recurring, 3 -> adopted
         run(["bump", "new-thing"])

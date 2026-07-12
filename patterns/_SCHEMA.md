@@ -24,6 +24,8 @@ state: noticed | recurring | adopted   # automatic, occurrence-driven
 occurrences: 1
 cluster: tooling | code-style | workflow | communication | testing | ...
 decision: accepted | rejected        # optional manual override of `state`; omit for automatic
+agent: claude-code | cursor | copilot | unknown   # which harness first captured it
+author: <git user.email> | anon                   # who it was learned from
 applies_to:
   tool: "*" | claude | cursor | copilot     # "*" = all tools
   glob: "**/*"                              # file scope, tool-dependent
@@ -98,6 +100,18 @@ not one per pattern). Whenever clusters change, regenerate `PROFILE.md`:
 group adopted patterns under a `## <cluster>` heading each, with a
 sentence or two of synthesis per cluster, not just a re-listing of the
 pattern bullets — that's the difference between a profile and an index.
+
+## Provenance (`agent`, `author`)
+
+Every pattern records where it came from: `agent` is the harness that first
+captured the signal (map the signal `source` — `claude-stop-hook` →
+`claude-code`, `cursor-prompt-hook` → `cursor`, `copilot-prompt-hook` →
+`copilot`; `unknown` if unclear), and `author` is the user it was learned
+from (`git config user.email`, or `anon` when there's no git identity).
+`patternity.py add` fills both automatically (author from git, agent from
+`--agent`/`$PATTERNITY_AGENT`). They're informational — not used for
+compilation — but let you see, in the dashboard drawer, who/what a pattern
+came from (useful once a store is shared across machines or people).
 
 ## Field notes
 
