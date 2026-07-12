@@ -28,6 +28,10 @@ titles: `feat:`, `fix:`, `docs:`, `ci:`, `refactor:`, `chore:`, … — a `feat:
 bumps the minor version, `fix:` the patch, `feat!:`/`BREAKING CHANGE` the
 major.
 
+> ⚠️ A PR opened without an explicit title defaults to the branch name (e.g.
+> `Logo favicon social`), which has no prefix and **fails `lint`**. Set the
+> title yourself — `gh pr create --title "feat: …"` or `gh pr edit --title`.
+
 ## Releases (release-please)
 
 Releases are automated by [release-please](https://github.com/googleapis/release-please)
