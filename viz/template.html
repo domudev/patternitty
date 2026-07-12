@@ -58,6 +58,9 @@
   }
   .search::placeholder { color: var(--text-muted); }
   .search:focus { outline: none; border-color: var(--text-muted); box-shadow: 0 0 0 3px rgba(255,255,255,0.06); }
+  .controls { display: flex; align-items: center; gap: 8px; }
+  .hbtn { font-family: inherit; font-size: 12px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--card); color: var(--text-secondary); padding: 9px 12px; cursor: pointer; white-space: nowrap; }
+  .hbtn:hover { color: var(--text-primary); background: var(--card-hover); }
 
   /* distribution bar — live proportion of the store by bucket (incl. accepted
      folded into Adopted, and rejected). 2px surface gaps between segments. */
@@ -247,7 +250,10 @@
     </div>
     <p class="sub">what it's noticed about how you work, from first sighting to something it now assumes.</p>
   </div>
-  <input class="search" id="search" type="search" placeholder="search patterns…" autocomplete="off">
+  <div class="controls">
+    <input class="search" id="search" type="search" placeholder="search patterns…" autocomplete="off">
+    <button class="hbtn" id="recompile" hidden title="apply adopted patterns to this repo">↻ recompile</button>
+  </div>
 </header>
 <div class="dist" id="dist"></div>
 <div class="profile" id="profile" hidden></div>
@@ -298,6 +304,10 @@
   // name -> target decision ('accepted' | 'rejected' | '') for this session,
   // overlaid on the stored decision until applied via decide.py.
   const pending = new Map();
+  // served by `patternity dashboard --serve`? then accept/reject persists
+  // instantly via POST /decide; opened as a file:// it falls back to pending
+  // + the copy-a-command tray.
+  const SERVED = location.protocol === 'http:' || location.protocol === 'https:';
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -341,9 +351,23 @@
     </div>`;
   }
 
-  function setDecision(index, verb) {
+  async function setDecision(index, verb) {
     const p = DATA[index];
     const target = effDecision(p) === verb ? '' : verb;  // click active verb again = undo
+    if (SERVED) {
+      try {
+        const res = await fetch('/decide', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: p.name, decision: target }),
+        });
+        const fresh = await res.json();
+        DATA.length = 0; DATA.push(...fresh);  // persisted; reflect the store
+      } catch (e) {
+        pending.set(p.name, target);  // server hiccup → fall back to pending
+      }
+      render();
+      return;
+    }
     pending.set(p.name, target);
     render();
   }
@@ -411,8 +435,8 @@
       tokens.push(`${verb[target]}:${name}`);
     }
     const tray = document.getElementById('tray');
-    tray.hidden = tokens.length === 0;
-    if (tokens.length) document.getElementById('tray-cmd').textContent =
+    tray.hidden = SERVED || tokens.length === 0;  // served mode persists directly — no tray
+    if (!SERVED && tokens.length) document.getElementById('tray-cmd').textContent =
       `uv run <patternity-repo>/scripts/decide.py ${tokens.join(' ')}`;
   }
 
@@ -425,6 +449,19 @@
     navigator.clipboard?.writeText(document.getElementById('tray-cmd').textContent);
   });
   document.getElementById('tray-clear').addEventListener('click', () => { pending.clear(); render(); });
+
+  // served mode: expose a "recompile" button that applies adopted patterns to
+  // the repo the server was started in (POST /compile).
+  const recompileBtn = document.getElementById('recompile');
+  if (SERVED) {
+    recompileBtn.hidden = false;
+    recompileBtn.addEventListener('click', async () => {
+      recompileBtn.textContent = '↻ compiling…';
+      try { await fetch('/compile', { method: 'POST' }); recompileBtn.textContent = '✓ recompiled'; }
+      catch (e) { recompileBtn.textContent = '⚠ failed'; }
+      setTimeout(() => { recompileBtn.textContent = '↻ recompile'; }, 1600);
+    });
+  }
 
   // tiny markdown renderer — just the subset patternity emits (headings,
   // bullets, **bold**, `code`), escaped-first so it can't inject HTML. Not a

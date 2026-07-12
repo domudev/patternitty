@@ -2,3 +2,11 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# compile.py outputs, in case it's ever run with this repo as the cwd (dev/testing) —
+# in a real target repo you'd commit these; here they're just pollution.
+/CLAUDE.md
+/AGENTS.md
+/patternity/
+.cursor/rules/patternity-learned.mdc
+.github/instructions/

@@ -16,7 +16,8 @@ Read:   search <query> [--regex] [--limit N] [--json]   (BM25 by default)
 Write:  add <name> [--type T] [--cluster C] [--tool T] [--project P] [--body "…"]
         set <name> <field> <value>           (or --clear to remove the field)
         bump <name>                          (occurrences +1, re-derive state)
-View:   dashboard                            (regenerate + open index.html)
+View:   dashboard [--serve]                  (open index.html; --serve adds
+                                             instant accept/reject write-back)
 
 All commands operate on ${PATTERNITY_HOME:-~/.patternity}/patterns/.
 """
@@ -184,15 +185,74 @@ def cmd_bump(args) -> int:
     return 0
 
 
+def _open(url_or_path) -> None:
+    if os.environ.get("PATTERNITY_NO_OPEN"):
+        return  # headless / tests
+    opener = {"darwin": "open", "win32": "start"}.get(sys.platform, "xdg-open")
+    subprocess.run([opener, str(url_or_path)], shell=(opener == "start"), check=False)
+
+
 def cmd_dashboard(args) -> int:
     # first run has no store yet — create it and render an empty board rather
     # than dead-ending, so there's always something to open.
     ensure_store()
     import compile as compile_mod  # regenerate the viz from the store (no project needed)
-    _, html = compile_mod.write_viz(load_all())
-    opener = {"darwin": "open", "win32": "start"}.get(sys.platform, "xdg-open")
-    print(f"opening {html}")
-    subprocess.run([opener, str(html)], shell=(opener == "start"), check=False)
+    compile_mod.write_viz(load_all())
+    html_path = patterns_dir() / "index.html"
+
+    if not args.serve:
+        # non-blocking: just open the static file (safe for the plugin command).
+        # accept/reject falls back to the copy-a-command tray.
+        print(f"opening {html_path}")
+        _open(html_path)
+        return 0
+
+    # interactive: serve on 127.0.0.1 with a write-back endpoint, so accept/
+    # reject persists to the store instantly (no copy). Blocks until Ctrl-C —
+    # run this from a terminal, not via the agent's dashboard command.
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    class Handler(BaseHTTPRequestHandler):
+        def _send(self, code, body, ctype):
+            self.send_response(code)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def do_GET(self):
+            if self.path in ("/", "/index.html"):
+                self._send(200, html_path.read_bytes(), "text/html; charset=utf-8")
+            else:
+                self._send(404, b"not found", "text/plain")
+
+        def do_POST(self):
+            if self.path == "/decide":
+                length = int(self.headers.get("Content-Length", 0))
+                data = json.loads(self.rfile.read(length) or b"{}")
+                path = resolve_path(data.get("name", ""))
+                if path:
+                    set_field(path, "decision", data.get("decision") or None)
+                compile_mod.write_viz(load_all())  # refresh embedded data
+                self._send(200, (patterns_dir() / "index.json").read_bytes(), "application/json")
+            elif self.path == "/compile":
+                # apply adopted patterns to the repo the server was started in
+                compile_mod.main()
+                self._send(200, b'{"ok":true}', "application/json")
+            else:
+                self._send(404, b"not found", "text/plain")
+
+        def log_message(self, *a):
+            pass  # quiet
+
+    server = HTTPServer(("127.0.0.1", 0), Handler)
+    url = f"http://127.0.0.1:{server.server_address[1]}/"
+    print(f"serving patternity dashboard at {url}  (Ctrl-C to stop)", flush=True)
+    _open(url)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nstopped")
     return 0
 
 
@@ -206,7 +266,7 @@ def main(argv: list[str]) -> int:
     a = sub.add_parser("add"); a.add_argument("name"); a.add_argument("--type", default="feedback"); a.add_argument("--cluster"); a.add_argument("--tool", default="*"); a.add_argument("--project", default="*"); a.add_argument("--agent"); a.add_argument("--body"); a.add_argument("--repo", action="store_true", help="write to the committed per-repo store instead of the personal one"); a.set_defaults(fn=cmd_add)
     st = sub.add_parser("set"); st.add_argument("name"); st.add_argument("field"); st.add_argument("value", nargs="?"); st.add_argument("--clear", action="store_true"); st.set_defaults(fn=cmd_set)
     b = sub.add_parser("bump"); b.add_argument("name"); b.set_defaults(fn=cmd_bump)
-    d = sub.add_parser("dashboard"); d.set_defaults(fn=cmd_dashboard)
+    d = sub.add_parser("dashboard"); d.add_argument("--serve", action="store_true", help="serve on localhost with instant accept/reject write-back (blocks; run from a terminal)"); d.set_defaults(fn=cmd_dashboard)
 
     args = ap.parse_args(argv)
     return args.fn(args)

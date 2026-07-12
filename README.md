@@ -159,20 +159,25 @@ automatic occurrence-driven ladder; `decision` is your manual override.
 The board's hover buttons (✓ / ✕ on each card, or the buttons in the drawer)
 let you **accept** a pattern (pins it to Adopted / compiled regardless of
 count) or **reject** it (drops it to the collapsed "Rejected" tray;
-tombstoned, never compiled, and the skill won't re-propose it). Because the
-board is a static `file://` page it can't write the store directly, so your
-clicks stage a set of pending decisions and a bar appears with the exact
-command to persist them:
+tombstoned, never compiled, and the skill won't re-propose it).
 
-```bash
-uv run <patternity-repo>/scripts/decide.py accept:uv-pref reject:tabs-not-spaces
-# then re-run compile.py to reflect it (or just ask your agent — the
-# patternity skill sets the same `decision` field)
-```
+There are three ways to actually apply a decision, in order of least
+friction:
 
-`decide.py` writes the `decision` field into each pattern file in the store;
-the next `compile.py` honors it (`is_effective_proven`). Reopen a rejected
-card and clear it (`clear:name`) to hand it back to the automatic ladder.
+1. **Just tell your agent** — "reject the tabs pattern", "accept uv-pref".
+   The `patternity` skill sets the `decision` field and recompiles. This is
+   the normal plugin flow; you rarely touch the dashboard for decisions.
+2. **`patternity.py dashboard --serve`** — serves the board on localhost
+   with a write-back endpoint, so clicking ✓/✕ **persists instantly** (and a
+   `↻ recompile` button applies adopted patterns to the current repo). Runs
+   from a terminal, blocks until Ctrl-C.
+3. **Static `file://` fallback** — opened as a plain file, the board can't
+   write to disk, so your clicks stage pending decisions and show the exact
+   `decide.py accept:… reject:…` command to run.
+
+All three set the same `decision` field in the store; the next `compile.py`
+honors it (`is_effective_adopted`). Clearing a decision hands the pattern
+back to the automatic ladder.
 
 If `${PATTERNITY_HOME:-~/.patternity}/patterns/PROFILE.md` exists, it's
 rendered as a summary panel above the board — the skill's synthesis of
