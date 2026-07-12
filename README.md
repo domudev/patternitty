@@ -37,17 +37,41 @@ Nobody hand-maintains a `CLAUDE.md` ever again. You're welcome.
 - **Personal + team.** Your preferences follow you across repos; team
   conventions live committed in the repo.
 
-## Install (Claude Code)
+## Install
+
+### Claude Code
+
+Add the marketplace:
 
 ```
 /plugin marketplace add domudev/patternity
+```
+
+Install the plugin:
+
+```
 /plugin install patternity@patternity
 ```
 
 Then just work. After a few sessions, run `/patternity` and watch it write
 the `CLAUDE.md` you were never going to.
 
-Cursor / Copilot and the full setup: **[docs/install.md](docs/install.md)**.
+### Cursor
+
+From your patternity clone, wire the hooks into a project:
+
+```
+scripts/install.sh /path/to/your/project cursor
+```
+
+### GitHub Copilot
+
+```
+scripts/install.sh /path/to/your/project copilot
+```
+
+Full setup, git-history seeding, and backing up your store:
+**[docs/install.md](docs/install.md)**.
 
 ## How it works (10-second version)
 
@@ -61,15 +85,9 @@ git diff you can revert. Full walkthrough: **[docs/how-it-works.md](docs/how-it-
 
 ## Docs
 
-| | |
-|---|---|
-| **[How it works](docs/how-it-works.md)** | capture, the noticed/recurring/adopted ladder, compilation |
-| **[Install & hosts](docs/install.md)** | Claude Code, Cursor, Copilot, git-history mining, backing up your store |
-| **[Dashboard](docs/dashboard.md)** | the board, accept/reject, the profile panel |
-| **[CLI & server](docs/cli.md)** | `patternity.py` commands and the localhost API |
-| **[Patterns & the store](docs/patterns.md)** | schema, two tiers, scoping, clusters, provenance, overrides |
-| **[Development](docs/development.md)** | tests, conventional commits, releases, repo layout |
-
-## License
-
-MIT, Dominik Müller
+- **[How it works](docs/how-it-works.md)**: capture, the noticed/recurring/adopted ladder, compilation
+- **[Install & hosts](docs/install.md)**: Claude Code, Cursor, Copilot, git-history mining, backing up your store
+- **[Dashboard](docs/dashboard.md)**: the board, accept/reject, the profile panel
+- **[CLI & server](docs/cli.md)**: `patternity.py` commands and the localhost API
+- **[Patterns & the store](docs/patterns.md)**: schema, two tiers, scoping, clusters, provenance, overrides
+- **[Development](docs/development.md)**: tests, conventional commits, releases, repo layout
