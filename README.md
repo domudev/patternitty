@@ -303,6 +303,19 @@ uv run /path/to/patternity/scripts/mine_git_history.py
 - Adapters cover Claude Code, Cursor, and Copilot. Adding another tool means
   adding one render function in `scripts/compile.py`.
 
+## Releases
+
+CI (`.github/workflows/ci.yml`) runs the four self-checks on every push and
+PR. Releases are **version-driven**: the source of truth is the `version` in
+`.claude-plugin/plugin.json`. On a push to `main`, once tests pass, the
+workflow checks whether that version already has a GitHub Release — if not,
+it tags `vX.Y.Z` at the commit and cuts a release with auto-generated notes.
+
+So the whole release flow is just: **bump `version` in `plugin.json`, commit,
+push.** No manual tagging. Pushes that don't change the version are no-ops
+for the release job. Consumers can pin a version via the marketplace
+`source` ref (`domudev/patternity#v0.3.2`).
+
 ## Repo layout
 
 - `skills/patternity/SKILL.md` — canonical distillation/promotion logic
