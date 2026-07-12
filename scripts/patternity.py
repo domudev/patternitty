@@ -157,9 +157,9 @@ def cmd_bump(args) -> int:
 
 
 def cmd_dashboard(args) -> int:
-    if not patterns_dir().exists():
-        print(f"no pattern store at {patterns_dir()}", file=sys.stderr)
-        return 1
+    # first run has no store yet — create it and render an empty board rather
+    # than dead-ending, so there's always something to open.
+    patterns_dir().mkdir(parents=True, exist_ok=True)
     import compile as compile_mod  # regenerate the viz from the store (no project needed)
     _, html = compile_mod.write_viz(load_all())
     opener = {"darwin": "open", "win32": "start"}.get(sys.platform, "xdg-open")
