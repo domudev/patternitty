@@ -14,66 +14,33 @@ it owns, everything else in the target file is left alone. No frontmatter
 YAML parser dependency — the schema is small and controlled
 (patterns/_SCHEMA.md), so a hand-rolled parser is a few lines vs. a new dep.
 
+Also regenerates the store-wide visualization (index.json + index.html) in
+${PATTERNITY_HOME:-~/.patternity}/patterns/, covering every pattern at any
+state — not just what got compiled for this project.
+
 Run from the project you want compiled patternity patterns applied to:
     uv run /path/to/patternity/scripts/compile.py
 """
-import fnmatch
-import os
+import json
 import re
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _lib import in_scope, load_all, patterns_dir  # noqa: E402
 
 BEGIN = "<!-- patternity:begin -->"
 END = "<!-- patternity:end -->"
-
-
-def patterns_dir() -> Path:
-    home = os.environ.get("PATTERNITY_HOME", str(Path.home() / ".patternity"))
-    return Path(home) / "patterns"
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def current_project() -> str:
     return Path.cwd().name
 
 
-def parse_pattern(path: Path) -> dict:
-    text = path.read_text()
-    _, fm, body = text.split("---", 2)
-    data: dict = {}
-    applies_to: dict = {}
-    in_applies_to = False
-    for line in fm.splitlines():
-        if not line.strip():
-            continue
-        if line.startswith("applies_to:"):
-            in_applies_to = True
-            continue
-        if in_applies_to and line.startswith("  "):
-            k, _, v = line.strip().partition(":")
-            applies_to[k.strip()] = v.strip().strip('"')
-            continue
-        in_applies_to = False
-        k, _, v = line.partition(":")
-        data[k.strip()] = v.strip().strip('"')
-    data["applies_to"] = applies_to
-    data["body"] = body.strip()
-    data["name"] = path.stem
-    return data
-
-
-def in_scope(p: dict, project: str) -> bool:
-    project_scope = p["applies_to"].get("project", "*")
-    return project_scope == "*" or project in project_scope.split(",")
-
-
 def load_proven(project: str) -> tuple[list[dict], list[dict]]:
     additive, overrides = [], []
-    directory = patterns_dir()
-    if not directory.exists():
-        return additive, overrides
-    for path in sorted(directory.glob("*.md")):
-        if path.name.startswith("_") or path.name == "WALKING_DOC.md":
-            continue
-        p = parse_pattern(path)
+    for p in load_all():
         if p.get("state") != "proven" or not in_scope(p, project):
             continue
         (overrides if p.get("type") == "override" else additive).append(p)
@@ -173,6 +140,26 @@ def write_overrides_report(unresolved: list[str]) -> None:
     replace_marked_section(Path("AGENTS.md"), body, "## Overrides (needs manual check)")
 
 
+def write_viz(all_patterns: list[dict]) -> list[Path]:
+    """Regenerate the whole-store visualization: index.json (raw data) and
+    index.html (the same data embedded, so it opens via file:// with no
+    server and no fetch/CORS gotcha)."""
+    slim = [
+        {k: p.get(k, "") for k in ("name", "type", "state", "occurrences", "applies_to", "target", "body")}
+        for p in all_patterns
+    ]
+    json_path = patterns_dir() / "index.json"
+    json_path.write_text(json.dumps(slim, indent=2))
+
+    template = (REPO_ROOT / "viz" / "template.html").read_text()
+    html_path = patterns_dir() / "index.html"
+    # escape "<" so a pattern body containing the literal text "</script>"
+    # can't break out of the embedded data tag
+    embedded = json.dumps(slim).replace("<", "\\u003c")
+    html_path.write_text(template.replace("/*__PATTERNITY_DATA__*/", embedded))
+    return [json_path, html_path]
+
+
 def main() -> None:
     project = current_project()
     if not patterns_dir().exists():
@@ -185,6 +172,7 @@ def main() -> None:
     written += [write_cursor_rule(additive), write_copilot_instructions(additive)]
     if unresolved:
         write_overrides_report(unresolved)
+    written += write_viz(load_all())
 
     print(f"[{project}] compiled {len(additive)} pattern(s), {len(applied)} override(s) applied, {len(unresolved)} unresolved")
     for w in written:

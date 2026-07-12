@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>patternity — pattern store</title>
+<style>
+  /* ordinal 3-step blue ramp (palette.md sequential hue, steps 250/400/600) —
+     state is a position in a sequence, not a category, so one hue + monotone
+     lightness, never a rainbow. override is a separate variable (type, not
+     state), marked with the reserved status-warning step + icon, never by
+     recoloring the card. */
+  :root {
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --border: rgba(11,11,11,0.10);
+    --gridline: #e1e0d9;
+    --observed: #86b6ef;
+    --suspect: #3987e5;
+    --proven: #184f95;
+    --warning: #fab219;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --border: rgba(255,255,255,0.10);
+      --gridline: #2c2c2a;
+      /* ponytail: reusing the light-mode ordinal steps as-is (same hue,
+         already spread across the ramp) rather than deriving/validating a
+         separate dark ordinal ramp — revisit if this ever needs a real
+         accessibility sign-off instead of a personal single-user viewer. */
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+  }
+  header { padding: 24px 32px 8px; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .sub { color: var(--text-secondary); font-size: 13px; margin: 0; }
+  .kpis { display: flex; gap: 12px; padding: 16px 32px; }
+  .kpi { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; min-width: 96px; }
+  .kpi .n { font-size: 24px; font-weight: 600; }
+  .kpi .l { font-size: 12px; color: var(--text-secondary); }
+  .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 8px 32px 32px; }
+  @media (max-width: 720px) { .board { grid-template-columns: 1fr; } }
+  .col h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-left: 4px solid var(--state-color, var(--gridline)); border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; }
+  .card .name { font-weight: 600; font-size: 14px; }
+  .card .meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .card .why { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; border: 1px solid var(--warning); }
+  .progress { display: flex; gap: 3px; margin-top: 8px; }
+  .progress .p { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--gridline); }
+  .empty { color: var(--text-muted); font-size: 12px; font-style: italic; }
+</style>
+</head>
+<body>
+<header>
+  <h1>patternity — pattern store</h1>
+  <p class="sub">Personal, cross-project patterns learned from corrections, confirmations, and commit history.</p>
+</header>
+<div class="kpis" id="kpis"></div>
+<div class="board" id="board">
+  <div class="col" data-state="observed"><h2><span class="dot" style="background:var(--observed)"></span>Observed</h2><div class="cards"></div></div>
+  <div class="col" data-state="suspect"><h2><span class="dot" style="background:var(--suspect)"></span>Suspect</h2><div class="cards"></div></div>
+  <div class="col" data-state="proven"><h2><span class="dot" style="background:var(--proven)"></span>Proven</h2><div class="cards"></div></div>
+</div>
+<script id="patternity-data" type="application/json">/*__PATTERNITY_DATA__*/</script>
+<script>
+  const DATA = JSON.parse(document.getElementById('patternity-data').textContent || '[]');
+  const STATE_COLOR = { observed: 'var(--observed)', suspect: 'var(--suspect)', proven: 'var(--proven)' };
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  const counts = { observed: 0, suspect: 0, proven: 0 };
+  DATA.forEach(p => { if (counts[p.state] !== undefined) counts[p.state]++; });
+  document.getElementById('kpis').innerHTML = [
+    ['Total', DATA.length], ['Observed', counts.observed], ['Suspect', counts.suspect], ['Proven', counts.proven],
+  ].map(([l, n]) => `<div class="kpi"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+
+  function card(p) {
+    const occ = Math.min(parseInt(p.occurrences, 10) || 0, 3);
+    const dots = [1, 2, 3].map(i => `<span class="p" style="background:${i <= occ ? STATE_COLOR[p.state] : 'transparent'}"></span>`).join('');
+    const at = p.applies_to || {};
+    const scope = [at.tool, at.project].filter(x => x && x !== '*').join(' · ') || 'all tools · all projects';
+    const overrideBadge = p.type === 'override' ? '<span class="badge">⚠ override</span>' : '';
+    const why = (p.body || '').split('\n').find(l => l.trim()) || '';
+    return `<div class="card" style="--state-color:${STATE_COLOR[p.state] || 'var(--gridline)'}">
+      <div class="name">${escapeHtml(p.name)}${overrideBadge}</div>
+      <div class="meta">${escapeHtml(scope)} · ${escapeHtml(p.type || '')}</div>
+      <div class="why">${escapeHtml(why)}</div>
+      <div class="progress">${dots}</div>
+    </div>`;
+  }
+
+  document.querySelectorAll('.col').forEach(col => {
+    const items = DATA.filter(p => p.state === col.dataset.state);
+    col.querySelector('.cards').innerHTML = items.length ? items.map(card).join('') : '<div class="empty">nothing here yet</div>';
+  });
+</script>
+</body>
+</html>

@@ -22,19 +22,29 @@ reflects it into every tool's instructions on its own.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> observed: signal captured\n(hook / git-history mining)
+    [*] --> observed
 
-    observed --> suspect: same preference\nrecurs (2nd time)
-    suspect --> proven: recurs again\n(3rd+ time)
-    observed --> proven: explicit "always" /\n"never" / "from now on"
-    suspect --> proven: explicit "always" /\n"never" / "from now on"
+    observed --> suspect: recurs again
+    suspect --> proven: recurs again
+    observed --> proven: explicit "always" / "never"
+    suspect --> proven: explicit "always" / "never"
+    proven --> [*]: compiled automatically
 
-    proven --> [*]: compile.py runs automatically\nCLAUDE.md · AGENTS.md · .cursor/rules · *.instructions.md
+    note right of observed
+        signal captured once
+        (hook or git-history mining)
+    end note
+
+    note right of suspect
+        seen twice, trending
+        not compiled yet
+    end note
 
     note right of proven
-        no manual approval step —
-        the diff on compiled files
-        is the safety net
+        3rd+ occurrence, or an explicit
+        standing statement.
+        compile.py runs immediately,
+        no manual approval step.
     end note
 
     classDef observedStyle fill:#fef3c7,stroke:#d97706,color:#78350f
@@ -85,6 +95,44 @@ index — one line per pattern, its state, and occurrence count — regenerated
 every time the skill touches a pattern. See `patterns/_SCHEMA.md` for the
 full frontmatter and the state ladder.
 
+## Backing up your pattern store
+
+`${PATTERNITY_HOME:-~/.patternity}` is treated like dotfiles: its own local
+git repo from the start, so every promotion is a revertible commit, but
+nothing is ever pushed automatically. One-time setup:
+
+```bash
+scripts/init_store.sh   # git init's the store if it isn't already a repo
+```
+
+The `patternity` skill commits there itself after every distill run
+(`git -C ~/.patternity add -A && git commit -m "..."`). To back it up or
+sync across machines, add a remote whenever you want — e.g. a private
+personal repo, kept separate from any project's code:
+
+```bash
+gh repo create <you>/patterns --private --source ~/.patternity --remote origin --push
+```
+
+## Visualizing the store
+
+Every `compile.py` run also regenerates
+`${PATTERNITY_HOME:-~/.patternity}/patterns/index.html` — a Kanban-style
+board (Observed | Suspect | Proven) of every pattern in the store, at every
+state, across every project. It's a single self-contained file with the
+data embedded inline (no server, no fetch/CORS issue — just open it):
+
+```bash
+open ~/.patternity/patterns/index.html   # macOS; xdg-open on Linux
+```
+
+`index.json` next to it is the same data in plain structured form, for
+anything else you want to build on top (a CLI summary, a different view).
+State is encoded as one hue at three lightness steps (a progression, not a
+category); `type: override` patterns get a small warning badge instead of a
+recolored card, since it's a different variable. Occurrence count shows as
+three small dots, filled up to the pattern's count.
+
 ## Fine-grained scoping
 
 The store is global, but a pattern doesn't have to apply everywhere:
@@ -104,6 +152,33 @@ file changed), it's flagged under a `## Overrides (needs manual check)`
 section instead of silently failing. Copilot in particular resolves
 conflicting instructions non-deterministically, so removing the offending
 text directly is the only reliable way to suppress it there.
+
+## Install
+
+Clone this repo once (`git clone https://github.com/domudev/patternity`),
+then wire it into whichever host(s) you use, per project:
+
+**Claude Code** — real plugin install, no file copying needed:
+```
+/plugin marketplace add domudev/patternity
+/plugin install patternity@patternity
+```
+This repo is private, so `/plugin marketplace add` needs GitHub access to
+your account — if it can't fetch the marketplace, flip the repo to public
+or fall back to referencing `skills/patternity/SKILL.md` and
+`hooks/capture-hooks.json` directly from your clone.
+
+**Cursor** and **GitHub Copilot** don't have an install command — their
+hooks are just files in the target repo, so `scripts/install.sh` copies and
+path-fills them for you:
+```bash
+# from your patternity clone
+scripts/install.sh /path/to/target-project        # both Cursor + Copilot
+scripts/install.sh /path/to/target-project cursor  # just one
+scripts/install.sh /path/to/target-project copilot
+```
+It skips (and prints instead) any file that already exists in the target,
+so it won't clobber hooks/instructions you've already customized.
 
 ## Quickstart
 
@@ -133,6 +208,8 @@ uv run /path/to/patternity/scripts/mine_git_history.py
 - `skills/patternity/SKILL.md` — canonical distillation/promotion logic
 - `commands/` — `/patternity-distill`, `/patternity-compile` slash commands
 - `hooks/` — shared capture hook wired into Claude Code, Cursor, and Copilot
-- `scripts/` — `mine_git_history.py`, `compile.py` (plain `uv run` scripts, no project/deps needed)
+- `scripts/` — `mine_git_history.py`, `compile.py`, shared `_lib.py` parser (plain `uv run` scripts, no project/deps needed), plus `install.sh` (wires Cursor/Copilot into a target project) and `init_store.sh` (git-inits the personal pattern store)
 - `patterns/` — schema doc + reference example (the real store is `${PATTERNITY_HOME:-~/.patternity}/patterns/`)
+- `viz/template.html` — the visualization `compile.py` fills in and writes to the store as `index.html`
+- `.claude-plugin/` — `plugin.json` + `marketplace.json` so this repo installs directly via `/plugin marketplace add domudev/patternity`
 - `.cursor/rules/`, `.github/`, `.cursor/hooks.json` — static pointers so Cursor/Copilot know patternity exists, plus where the compiled learned-pattern files land

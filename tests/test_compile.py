@@ -7,6 +7,7 @@
 patterns don't, project scoping is respected, overrides remove exact-match
 text, and re-running is idempotent (no duplicate marked sections)."""
 import importlib.util
+import json
 import os
 import tempfile
 from pathlib import Path
@@ -83,6 +84,20 @@ target: "Always use tabs, never spaces."
 
 Suppress the annoying tabs rule.
 """)
+        write(patterns / "script-breakout.md", """---
+name: script-breakout
+type: feedback
+state: observed
+occurrences: 1
+applies_to:
+  tool: "*"
+  glob: "**/*"
+  project: "*"
+target: null
+---
+
+Mentions a literal </script> tag in prose, which must not break index.html.
+""")
 
         project_dir = Path(project)
         os.chdir(project_dir)
@@ -103,6 +118,18 @@ Suppress the annoying tabs rule.
 
         copilot = Path(".github/instructions/patternity-learned.instructions.md").read_text()
         assert "applyTo" in copilot
+
+        index_json = json.loads((Path(home) / "patterns" / "index.json").read_text())
+        assert {p["name"] for p in index_json} == {
+            "proven-one", "observed-one", "scoped-elsewhere", "override-one", "script-breakout",
+        }, "index.json should include every pattern regardless of state or project scope"
+
+        index_html = (Path(home) / "patterns" / "index.html").read_text()
+        assert "__PATTERNITY_DATA__" not in index_html, "template placeholder was not substituted"
+        assert "observed-one" in index_html, "embedded data missing from index.html"
+        data_tag_content = index_html.split('id="patternity-data"', 1)[1].split(">", 1)[1].split("</script>", 1)[0]
+        assert "</script>" not in data_tag_content, "a literal </script> in pattern body must not close the data tag early"
+        assert "\\u003c/script" in data_tag_content, "pattern body's </script> should be escaped, not passed through raw"
 
         # idempotency: compiling twice must not duplicate the marked section
         compile_mod.main()

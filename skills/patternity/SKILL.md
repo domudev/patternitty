@@ -67,6 +67,11 @@ For each piece of signal:
    until a pattern has shown up in more than one project — don't default a
    single-project observation to `project: "*"`.
 5. Rewrite `WALKING_DOC.md` to reflect the current state of every pattern.
+6. If `${PATTERNITY_HOME:-~/.patternity}` isn't a git repo yet, run
+   `<patternity-repo>/scripts/init_store.sh` once (idempotent, safe to call
+   every time). Then commit the change there: `git -C "${PATTERNITY_HOME:-$HOME/.patternity}" add -A && git -C "${PATTERNITY_HOME:-$HOME/.patternity}" commit -m "<name>: <observed|suspect|proven> (n=<occurrences>)"`.
+   Local commit only — never push, that's a separate, user-initiated step
+   (see README "Backing up your pattern store").
 
 ## Dynamic reflection
 
