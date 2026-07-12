@@ -329,16 +329,12 @@ def cmd_dashboard(args) -> int:
         def do_POST(self): self._dispatch("POST")
         def log_message(self, *a): pass  # quiet
 
-    # fixed port so the dashboard command can open a predictable URL and a
-    # re-run reuses the running server instead of spawning a duplicate.
-    port = int(os.environ.get("PATTERNITY_PORT", "8471"))
-    url = f"http://127.0.0.1:{port}/"
-    try:
-        server = HTTPServer(("127.0.0.1", port), Handler)
-    except OSError:
-        print(f"patternity dashboard already running at {url}", flush=True)
-        _open(url)
-        return 0
+    # random free port by default (0 = OS picks) so it never clashes with
+    # whatever's already running; the server opens the browser itself, so the
+    # port doesn't need to be known ahead of time. Override with PATTERNITY_PORT.
+    port = int(os.environ.get("PATTERNITY_PORT", "0"))
+    server = HTTPServer(("127.0.0.1", port), Handler)
+    url = f"http://127.0.0.1:{server.server_address[1]}/"
     print(f"serving patternity dashboard at {url}  (Ctrl-C to stop)", flush=True)
     _open(url)
     try:

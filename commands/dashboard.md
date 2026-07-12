@@ -10,10 +10,10 @@ nohup uv run "${CLAUDE_PLUGIN_ROOT}/scripts/patternity.py" dashboard --serve >/d
 ```
 
 `${CLAUDE_PLUGIN_ROOT}` is set by Claude Code to this plugin's install
-directory, so do not search the filesystem for the repo. The server runs on a
-fixed localhost port; accept/reject persists instantly and a `↻ recompile`
-button applies adopted patterns to the current repo. If it's already running,
-re-running just reopens the existing tab.
+directory, so do not search the filesystem for the repo. The server picks a
+random free localhost port and opens itself in the browser; accept/reject
+persists instantly and a `↻ recompile` button applies adopted patterns to
+the current repo.
 
 (To view without the write-back server, `dashboard` alone opens the static
 `index.html` file instead.)
