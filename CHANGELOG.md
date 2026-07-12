@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/domudev/patternitty/compare/v0.4.0...v0.5.0) (2026-07-12)
+
+
+### Features
+
+* new echo logo, favicon, social preview ([#4](https://github.com/domudev/patternitty/issues/4)) ([b802538](https://github.com/domudev/patternitty/commit/b802538a9c2ee5f8fe5198a6cca1c0bb800ba380))
+
 ## [0.4.0](https://github.com/domudev/patternitty/compare/v0.3.3...v0.4.0) (2026-07-12)
 
 
