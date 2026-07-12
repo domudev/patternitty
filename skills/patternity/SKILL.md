@@ -6,13 +6,15 @@ description: >
   pattern store at ${PATTERNITY_HOME:-~/.patternity}/patterns/, promotes
   patterns through noticed -> recurring -> adopted as they recur, clusters them
   into a synthesized PROFILE.md, and compiles adopted ones into
-  CLAUDE.md/AGENTS.md/.cursor/.github instructions right away. Use when the
-  user says "patternity", "/patternity", "learn my patterns",
-  "distill patterns", or asks what patternity has noticed/adopted/learned
-  about them. Also use proactively at the start of a session if
-  .patternity/signal.jsonl has grown substantially since the walking doc was
-  last updated. Do NOT use for one-off requests already stated explicitly —
-  this is for signal that was never said explicitly.
+  CLAUDE.md/AGENTS.md/.cursor/.github instructions right away.
+  **Invoke this proactively, without being asked** — the moment the user
+  states a standing preference or corrects the same kind of thing again
+  ("always X", "never Y", "stop doing Z", "use A not B", or the same
+  correction a second time), record it immediately; don't wait for a
+  /patternity command. Also fires on the explicit triggers ("patternity",
+  "/patternity", "learn/distill my patterns", "what have you noticed") and at
+  session start if signal has accumulated. You are the judge: act on durable
+  preferences, skip genuine one-offs.
 license: MIT
 ---
 
@@ -22,6 +24,29 @@ You are turning implicit signal into explicit rules, personal to the user
 across every project they work in — not just this repo. A user who corrects
 the same thing three times didn't want to type a CLAUDE.md entry, they
 wanted the agent to notice.
+
+## Act proactively — you're the judge
+
+The whole point is that the user shouldn't have to run a command. When,
+during normal work, the user says something that reads as a **standing
+preference or a repeat correction**, quietly record it right then via
+`patternity.py add`/`bump` — no need to run a full batch distill or wait for
+`/patternity`:
+
+- clear standing statements ("always…", "never…", "from now on…", "stop
+  doing…", "use A not B", "I prefer…") → record, and (per the ladder) an
+  explicit standing statement goes straight to `adopted`.
+- the same correction you've seen before → bump its `occurrences`.
+
+Then keep it to a one-line mention (see "Reporting"). **Restraint is the
+skill:** act only on durable, generalizable preferences. Skip genuine
+one-offs, task-specific instructions, and anything already fully explicit in
+that single message. A wrong pattern that calcifies into a compiled rule is
+worse than a missed one, so when unsure, leave it at `noticed`/skip rather
+than jump to `adopted`. The user can always accept/reject later.
+
+Running the full signal-log distill (below) is for `/patternity`, session
+start, or when signal has clearly piled up.
 
 ## Input
 
