@@ -5,89 +5,145 @@
 <title>patternity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* dark-first, no light theme. Chrome/ink and state hues are the validated
-     dark-surface steps from the dataviz skill's reference palette, not
-     hand-tuned: page/surface/ink from "Chart chrome & ink", state hues from
-     the dark categorical/status steps (blue #3987e5, warning #fab219,
-     good #0ca30c), blended onto the surface with color-mix at "area fill"
-     opacity (~15-18%) rather than picked as flat pastel HSL. override's
-     accent (violet #9085e9) is a categorical slot deliberately distinct
-     from all three state hues, so it never impersonates a state. */
+  /* Dark-only, no light theme. State is carried by a crisp accent (left bar +
+     glow + dot), NOT a full-card tint — low-opacity washes on a near-black
+     surface always read muddy, so cards share one neutral elevated surface and
+     the accent does the identity work. Accents: slate (observed, still unsure)
+     -> amber (suspect, building) -> green (proven, confident, vivid). override
+     gets a fourth reserved hue (violet) so it never impersonates a state. */
   :root {
-    --page: #0d0d0d;
-    --surface-1: #1a1a19;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --border: rgba(255,255,255,0.12);
-    --radius: 10px;
-    --observed-bg: color-mix(in srgb, #3987e5 15%, var(--surface-1));  /* categorical blue: just spotted */
-    --suspect-bg:  color-mix(in srgb, #fab219 15%, var(--surface-1));  /* status warning: warming up */
-    --proven-bg:   color-mix(in srgb, #0ca30c 16%, var(--surface-1));  /* status good: confirmed */
-    --override-accent: #9085e9; /* categorical violet, reserved for override badges only */
-    /* Inter for everything that's read as data (names, body text, chips,
-       numbers) — legible at small sizes, the standard neutral choice for a
-       dev tool. Caveat (handwriting) is reserved for titles/headings/cluster
-       names specifically, per --font-hand below; it never touches state,
-       occurrence, or scope text, which stay in the plain sans for legibility. */
+    --page: #0b0b0e;
+    --card: #17171c;
+    --card-hover: #1d1d23;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+    --text-primary: #f4f4f5;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --radius: 12px;
+
+    --observed: #8b95a7;   /* slate */
+    --suspect:  #f4b740;   /* amber */
+    --proven:   #3ddc84;   /* green */
+    --override: #a78bfa;   /* violet, override only */
+
     --font-sans: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
     --font-hand: 'Caveat', cursive;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: var(--font-sans); background: var(--page); color: var(--text-primary); }
-  header { padding: 28px 32px 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-  h1 { font-family: var(--font-hand); font-size: 30px; margin: 0; font-weight: 600; line-height: 1; }
-  .sub { color: var(--text-secondary); font-size: 13px; margin: 0; }
-  .search { border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); color: var(--text-primary); padding: 7px 10px; font-size: 13px; min-width: 220px; font-family: inherit; }
-  .search:focus { outline: 2px solid var(--text-muted); outline-offset: 2px; }
-  .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 0 32px 32px; align-items: start; }
-  @media (max-width: 720px) { .board { grid-template-columns: 1fr; } }
-  .col { border-top: 2px solid var(--border); padding-top: 12px; }
-  .col h2 { font-family: var(--font-hand); font-size: 20px; font-weight: 600; color: var(--text-secondary); margin: 0 0 12px; }
-  .col h2 .n { color: var(--text-muted); font-weight: 400; }
-  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 8px; cursor: pointer; outline: 2px solid transparent; outline-offset: 0; transition: outline-color .12s ease, outline-offset .12s ease; }
-  .card:hover, .card:focus-visible { outline-color: var(--text-secondary); outline-offset: 4px; }
-  @media (prefers-reduced-motion: no-preference) {
-    .card { animation: rise-in .3s ease both; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background:
+      radial-gradient(900px 500px at 18% -8%, rgba(97,110,150,0.12), transparent 60%),
+      var(--page);
+    background-attachment: fixed;
+    min-height: 100vh;
   }
-  @keyframes rise-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-  .card.observed { background: var(--observed-bg); }
-  .card.suspect { background: var(--suspect-bg); }
-  .card.proven { background: var(--proven-bg); }
-  .card .top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .card .name { font-family: var(--font-hand); font-weight: 600; font-size: 19px; }
-  .chip { font-size: 10px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-secondary); text-transform: uppercase; letter-spacing: .03em; background: rgba(255,255,255,0.06); }
-  .chip.cluster { font-family: var(--font-hand); font-size: 14px; font-weight: 600; text-transform: none; letter-spacing: normal; padding: 0 8px; }
-  .card .why { font-size: 12.5px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4; }
-  .card .foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+  header { padding: 34px 34px 18px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  h1 { font-family: var(--font-hand); font-size: 40px; margin: 0; font-weight: 700; line-height: .9; }
+  .sub { color: var(--text-secondary); font-size: 13.5px; margin: 6px 0 0; max-width: 46ch; }
+  .search {
+    border: 1px solid var(--border); border-radius: 8px; background: var(--card);
+    color: var(--text-primary); padding: 9px 12px; font-size: 13px; min-width: 230px; font-family: inherit;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .search::placeholder { color: var(--text-muted); }
+  .search:focus { outline: none; border-color: var(--border-strong); box-shadow: 0 0 0 3px rgba(255,255,255,0.06); }
+
+  .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; padding: 6px 34px 40px; align-items: start; }
+  @media (max-width: 760px) { .board { grid-template-columns: 1fr; } }
+
+  .col { --accent: var(--text-muted); }
+  .col[data-state="observed"] { --accent: var(--observed); }
+  .col[data-state="suspect"]  { --accent: var(--suspect); }
+  .col[data-state="proven"]   { --accent: var(--proven); }
+  .col h2 {
+    font-family: var(--font-hand); font-size: 24px; font-weight: 700; color: var(--text-primary);
+    margin: 0 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 9px;
+  }
+  .col h2::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .col h2 .n {
+    font-family: var(--font-sans); font-size: 11px; font-weight: 600; color: var(--text-secondary);
+    background: rgba(255,255,255,0.06); border-radius: 999px; padding: 2px 8px; margin-left: auto;
+  }
+
+  .card {
+    --accent: var(--text-muted);
+    position: relative; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 15px 17px 15px 19px; margin-bottom: 10px; cursor: pointer;
+    overflow: hidden;
+    transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+  }
+  .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+  .card.observed { --accent: var(--observed); }
+  .card.suspect  { --accent: var(--suspect); }
+  .card.proven   { --accent: var(--proven); }
+  .card:hover, .card:focus-visible {
+    outline: none; transform: translateY(-2px); background: var(--card-hover);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border-strong));
+    box-shadow: 0 8px 26px rgba(0,0,0,0.45);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .card { animation: rise-in .34s cubic-bezier(.2,.7,.3,1) both; }
+  }
+  @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .card .top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .card .name { font-family: var(--font-hand); font-weight: 700; font-size: 22px; line-height: 1; }
+  .card .why { font-size: 12.5px; color: var(--text-secondary); margin-top: 8px; line-height: 1.45; }
+  .card .foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
   .card .scope { font-size: 11px; color: var(--text-muted); }
-  .dots { display: flex; gap: 3px; }
-  .dots .p { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); opacity: .35; }
-  .dots .p.on { opacity: 1; }
-  /* solid, not a tinted overlay — a translucent color reads differently on
-     each of the three state backgrounds, so it can't be legible on all of
-     them at once. The reserved override accent is a fixed solid regardless
-     of which state card it happens to sit on. */
-  .badge { font-size: 10.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--override-accent); color: #0b0b0b; }
-  .empty { color: var(--text-muted); font-size: 12px; font-style: italic; }
-  .more { display: block; width: 100%; margin-top: 4px; padding: 8px; border: 1px dashed var(--border); border-radius: 6px; background: none; color: var(--text-secondary); font-size: 12px; font-family: inherit; cursor: pointer; }
-  .more:hover { background: var(--surface-1); }
-  .profile { margin: 0 32px 8px; padding: 16px 20px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-1); }
-  .profile h3 { font-family: var(--font-hand); font-size: 20px; font-weight: 600; color: var(--text-secondary); margin: 14px 0 2px; }
+
+  .chip {
+    font-size: 10px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border);
+    color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; background: rgba(255,255,255,0.05); white-space: nowrap;
+  }
+  .chip.cluster {
+    font-family: var(--font-hand); font-size: 15px; font-weight: 600; text-transform: none; letter-spacing: 0; padding: 0 9px;
+    color: var(--accent, var(--text-secondary)); border-color: color-mix(in srgb, var(--accent, var(--border)) 35%, transparent);
+    background: color-mix(in srgb, var(--accent, transparent) 12%, transparent);
+  }
+  .dots { display: flex; gap: 4px; align-items: center; }
+  .dots .p { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); opacity: .3; }
+  .dots .p.on { background: var(--accent); opacity: 1; box-shadow: 0 0 6px var(--accent); }
+  .badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--override); color: #14101f; text-transform: uppercase; letter-spacing: .04em; }
+
+  .empty { color: var(--text-muted); font-size: 12px; font-style: italic; padding: 4px 2px; }
+  .more {
+    display: block; width: 100%; margin-top: 2px; padding: 9px; border: 1px dashed var(--border); border-radius: 8px;
+    background: none; color: var(--text-secondary); font-size: 12px; font-family: inherit; cursor: pointer; transition: background .14s, border-color .14s;
+  }
+  .more:hover { background: rgba(255,255,255,0.04); border-color: var(--border-strong); }
+
+  .profile {
+    margin: 0 34px 14px; padding: 18px 22px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent), var(--card);
+  }
+  .profile h3 { font-family: var(--font-hand); font-size: 22px; font-weight: 700; color: var(--text-primary); margin: 16px 0 3px; }
   .profile h3:first-child { margin-top: 0; }
-  .profile p, .profile li { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 2px 0; }
+  .profile p, .profile li { font-size: 13px; color: var(--text-secondary); line-height: 1.55; margin: 2px 0; }
   .profile ul { margin: 4px 0; padding-left: 18px; }
 
-  dialog#detail { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-1); color: var(--text-primary); padding: 22px 26px; width: min(480px, 90vw); }
-  dialog#detail::backdrop { background: rgba(0,0,0,0.35); }
+  dialog#detail {
+    border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--card);
+    color: var(--text-primary); padding: 24px 28px; width: min(500px, 92vw);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+  }
+  dialog#detail[open] { animation: pop-in .18s ease both; }
+  @keyframes pop-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+  dialog#detail::backdrop { background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); }
   dialog#detail .dtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  dialog#detail h2 { font-family: var(--font-hand); font-size: 24px; font-weight: 600; margin: 0; }
-  dialog#detail .close { border: none; background: none; color: var(--text-muted); font-size: 18px; cursor: pointer; line-height: 1; padding: 4px; }
-  dialog#detail .row { margin-top: 14px; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .03em; }
-  dialog#detail .body { font-size: 13.5px; color: var(--text-secondary); line-height: 1.5; margin-top: 4px; white-space: pre-wrap; }
-  dialog#detail .chips { margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+  dialog#detail h2 { font-family: var(--font-hand); font-size: 28px; font-weight: 700; margin: 0; }
+  dialog#detail .close { border: none; background: none; color: var(--text-muted); font-size: 18px; cursor: pointer; line-height: 1; padding: 4px; transition: color .12s; }
+  dialog#detail .close:hover { color: var(--text-primary); }
+  dialog#detail .row { margin-top: 16px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  dialog#detail .body { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; margin-top: 5px; white-space: pre-wrap; }
+  dialog#detail .chips { margin-top: 18px; display: flex; gap: 7px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -139,10 +195,10 @@
     const dots = [1, 2, 3].map(i => `<span class="p${i <= occ ? ' on' : ''}"></span>`).join('');
     const at = p.applies_to || {};
     const scope = [at.tool, at.project].filter(x => x && x !== '*').join(' · ') || 'everywhere';
-    const badge = p.type === 'override' ? '<span class="badge">overrides another rule</span>' : '';
+    const badge = p.type === 'override' ? '<span class="badge">override</span>' : '';
     const why = (p.body || '').split('\n').find(l => l.trim()) || '';
     const tag = p.cluster ? `<span class="chip cluster">${escapeHtml(p.cluster)}</span>` : '';
-    return `<div class="card ${p.state}" data-index="${index}" tabindex="0" style="animation-delay:${delayStep * 30}ms">
+    return `<div class="card ${p.state}" data-index="${index}" tabindex="0" style="animation-delay:${delayStep * 35}ms">
       <div class="top"><span class="name">${escapeHtml(p.name)}</span>${tag}</div>
       <div class="why">${escapeHtml(why)}</div>
       <div class="foot">

@@ -131,21 +131,18 @@ open ~/.patternity/patterns/index.html   # macOS; xdg-open on Linux
 
 `index.json` next to it is the same data in plain structured form, for
 anything else you want to build on top (a CLI summary, a different view).
-The board is dark-only (no light theme) — chrome, ink, and state colors all
-come from the dataviz skill's validated dark-surface reference palette
-rather than hand-picked values: page/surface/text from its "chart chrome &
-ink" steps, and each state's wash from its dark categorical/status hues
-(blue for observed, warning-amber for suspect, good-green for proven),
-blended onto the surface at area-fill opacity rather than flattened into
-pastel HSL. `type: override` patterns get a small solid badge in a fourth,
-reserved accent (violet) instead of a recolored card, so it never gets
-confused for a state and stays legible regardless of which state's
-background it sits on. Occurrence count shows as three small dots, filled
-up to the pattern's count. `cluster` shows as a small chip on the card
-itself. Clicking a card (or Enter/Space when it's focused) opens a detail
-view with the full body text, not just the truncated first line — useful
-once a pattern's "why" runs longer than one line, or for reading an
-override's full suppressed-text target.
+The board is dark-only (no light theme). Cards all share one neutral
+elevated surface — state is carried by a crisp accent (a glowing left bar,
+matching progress dots, and a tinted cluster chip), not a full-card wash,
+since low-opacity tints on a near-black surface read muddy. The accents run
+slate (observed) → amber (suspect) → green (proven), a progression from
+"barely sure" to "confident". `type: override` patterns get a small solid
+badge in a fourth reserved accent (violet), so it's never confused for a
+state. Occurrence count shows as three dots filled up to the pattern's
+count. Clicking a card (or Enter/Space when focused) opens a detail view
+with the full body text, not just the truncated first line — useful once a
+pattern's "why" runs longer than one line, or for reading an override's
+full suppressed-text target.
 
 The header title, column/profile headings, card/dialog titles, and cluster
 chips use Caveat (a handwriting webfont) as a one-off flourish; everything
