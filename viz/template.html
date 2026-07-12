@@ -195,7 +195,13 @@
   dialog#detail .close { border: none; background: none; color: var(--text-muted); font-size: 18px; cursor: pointer; line-height: 1; padding: 4px; }
   dialog#detail .close:hover { color: var(--text-primary); }
   dialog#detail .row { margin-top: 16px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
-  dialog#detail .body { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; margin-top: 5px; white-space: pre-wrap; }
+  dialog#detail .body { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; margin-top: 5px; }
+  dialog#detail .body p { margin: 6px 0; }
+  dialog#detail .body h3 { font-family: var(--font-hand); font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 12px 0 2px; }
+  dialog#detail .body ul { margin: 6px 0; padding-left: 18px; }
+  dialog#detail .body strong { color: var(--text-primary); font-weight: 600; }
+  dialog#detail .body code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 3px; }
+  dialog#detail #d-target { white-space: pre-wrap; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
   dialog#detail .chips { margin-top: 18px; display: flex; gap: 7px; flex-wrap: wrap; }
   dialog#detail .drawer-actions { margin-top: 20px; display: flex; gap: 10px; }
   .btn { font-family: inherit; font-size: 13px; font-weight: 500; border-radius: var(--radius); padding: 9px 16px; cursor: pointer; border: 1px solid var(--border-strong); background: var(--card); color: var(--text-primary); }
@@ -391,20 +397,32 @@
   });
   document.getElementById('tray-clear').addEventListener('click', () => { pending.clear(); render(); });
 
-  // tiny markdown-ish renderer for PROFILE.md — only "## heading" + "- bullet"
-  // + prose lines (see _SCHEMA.md), not a general parser.
-  function renderProfile(md) {
-    const panel = document.getElementById('profile');
+  // tiny markdown renderer — just the subset patternity emits (headings,
+  // bullets, **bold**, `code`), escaped-first so it can't inject HTML. Not a
+  // general parser; enough for pattern bodies and PROFILE.md.
+  function mdInline(s) {
+    return escapeHtml(s)
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
+  }
+  function renderMarkdown(md) {
     let html = '', inList = false;
+    const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
     for (const raw of (md || '').split('\n')) {
       const line = raw.trim();
-      if (line.startsWith('## ')) { if (inList) { html += '</ul>'; inList = false; } html += `<h3>${escapeHtml(line.slice(3))}</h3>`; }
-      else if (line.startsWith('- ')) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${escapeHtml(line.slice(2))}</li>`; }
-      else if (line) { if (inList) { html += '</ul>'; inList = false; } html += `<p>${escapeHtml(line)}</p>`; }
+      if (!line) { closeList(); continue; }
+      if (line.startsWith('## ')) { closeList(); html += `<h3>${mdInline(line.slice(3))}</h3>`; }
+      else if (line.startsWith('# ')) { closeList(); html += `<h3>${mdInline(line.slice(2))}</h3>`; }
+      else if (line.startsWith('- ')) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${mdInline(line.slice(2))}</li>`; }
+      else { closeList(); html += `<p>${mdInline(line)}</p>`; }
     }
-    if (inList) html += '</ul>';
-    panel.innerHTML = html;
-    panel.hidden = !html;
+    closeList();
+    return html;
+  }
+  function renderProfile(md) {
+    const panel = document.getElementById('profile');
+    panel.innerHTML = renderMarkdown(md);
+    panel.hidden = !(md || '').trim();
   }
 
   const detail = document.getElementById('detail');
@@ -413,7 +431,7 @@
     openIndex = index;
     const p = DATA[index];
     document.getElementById('d-name').textContent = p.name;
-    document.getElementById('d-body').textContent = p.body || '';
+    document.getElementById('d-body').innerHTML = renderMarkdown(p.body || '');
     const at = p.applies_to || {};
     const scope = [at.tool, at.project, at.glob].filter(x => x && x !== '*').join(' · ') || 'everywhere';
     const hasTarget = p.type === 'override' && p.target && p.target !== 'null';
