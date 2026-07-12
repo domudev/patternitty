@@ -1,6 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="34" height="38" viewBox="0 0 32 30" fill="none" stroke-width="2.4" stroke-linecap="round">
-  <path d="M5 4 C2 9, 8 13, 5 18 C3 22, 6 24, 5 26" stroke="#8b95a7"/>
-  <path d="M12 4 C15 9, 9 13, 12 18 C14 22, 10 25, 12 26" stroke="#f4b740"/>
-  <path d="M19 4 C16 8, 22 12, 19 17 C17 21, 21 24, 19 26" stroke="#3ddc84"/>
-  <path d="M26 4 C29 9, 23 14, 26 19 C28 23, 24 25, 26 26" stroke="#a78bfa"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="230" height="52" viewBox="0 0 230 52" fill="none">
+  <defs>
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8b95a7"/>
+      <stop offset="0.38" stop-color="#f4b740"/>
+      <stop offset="0.7" stop-color="#3ddc84"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(4,12)" stroke-width="2.6" stroke-linecap="round">
+    <path d="M5 4 C2 9, 8 13, 5 18 C3 22, 6 24, 5 26" stroke="#8b95a7"/>
+    <path d="M12 4 C15 9, 9 13, 12 18 C14 22, 10 25, 12 26" stroke="#f4b740"/>
+    <path d="M19 4 C16 8, 22 12, 19 17 C17 21, 21 24, 19 26" stroke="#3ddc84"/>
+    <path d="M26 4 C29 9, 23 14, 26 19 C28 23, 24 25, 26 26" stroke="#a78bfa"/>
+  </g>
+  <!-- handwritten wordmark; Caveat where available, cursive fallback otherwise -->
+  <text x="42" y="39" font-family="'Caveat','Bradley Hand','Segoe Script',cursive" font-weight="700" font-size="38" fill="url(#ink)">patternity</text>
 </svg>
