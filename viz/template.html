@@ -179,19 +179,27 @@
   .tray button:hover { background: var(--card-hover); }
 
   /* bottom drawer (native <dialog> restyled as a bottom sheet — keeps Esc,
-     backdrop, and focus-trap for free). */
+     backdrop, and focus-trap for free). Carries the pattern's state accent,
+     set via data-state, so it reads as one system with the cards. */
   dialog#detail {
-    margin: auto auto 0 auto; width: 100%; max-width: 100%; border: none; border-top: 1px solid var(--border-strong);
+    --accent: var(--text-muted);
+    margin: auto auto 0 auto; width: 100%; max-width: 100%; border: none;
+    border-top: 2px solid var(--accent);
     border-radius: var(--radius) var(--radius) 0 0; background: var(--card); color: var(--text-primary);
-    padding: 22px 28px 28px; box-shadow: 0 -20px 60px rgba(0,0,0,0.6);
+    padding: 20px 28px 28px; box-shadow: 0 -20px 60px rgba(0,0,0,0.6);
   }
+  dialog#detail[data-state="noticed"]  { --accent: var(--noticed); }
+  dialog#detail[data-state="recurring"] { --accent: var(--recurring); }
+  dialog#detail[data-state="adopted"]  { --accent: var(--adopted); }
   dialog#detail[open] { animation: slide-up .22s cubic-bezier(.2,.7,.3,1) both; }
   @keyframes slide-up { from { transform: translateY(100%); } to { transform: none; } }
   dialog#detail::backdrop { background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); }
   .drawer-inner { max-width: 760px; margin: 0 auto; }
-  .drawer-grip { width: 34px; height: 4px; border-radius: 2px; background: var(--border-strong); margin: 0 auto 16px; }
-  dialog#detail .dtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  dialog#detail h2 { font-family: var(--font-hand); font-size: 28px; font-weight: 700; margin: 0; }
+  .drawer-grip { width: 34px; height: 4px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent); margin: 0 auto 18px; }
+  dialog#detail .dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  dialog#detail .dtitle { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  dialog#detail h2 { font-family: var(--font-hand); font-size: 28px; font-weight: 700; margin: 0; line-height: 1; }
+  .state-pill { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 3px 9px; border-radius: var(--radius); background: var(--accent); color: #0b0b0e; }
   dialog#detail .close { border: none; background: none; color: var(--text-muted); font-size: 18px; cursor: pointer; line-height: 1; padding: 4px; }
   dialog#detail .close:hover { color: var(--text-primary); }
   dialog#detail .row { margin-top: 16px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
@@ -241,7 +249,14 @@
 </div>
 <dialog id="detail"><div class="drawer-inner">
   <div class="drawer-grip"></div>
-  <div class="dtop"><h2 id="d-name"></h2><button class="close" id="d-close" aria-label="close">✕</button></div>
+  <div class="dhead">
+    <div class="dtitle">
+      <span class="state-pill" id="d-state"></span>
+      <h2 id="d-name"></h2>
+      <span class="chip cluster" id="d-cluster" hidden></span>
+    </div>
+    <button class="close" id="d-close" aria-label="close">✕</button>
+  </div>
   <div class="row">Why</div>
   <div class="body" id="d-body"></div>
   <div class="row" id="d-target-row" hidden>Overrides</div>
@@ -430,7 +445,14 @@
   function openDetail(index) {
     openIndex = index;
     const p = DATA[index];
+    // header: state accent + pill (uses the effective bucket so it matches
+    // where the card lives), name, then cluster chip
+    detail.dataset.state = bucket(p) === 'rejected' ? '' : bucket(p);
+    document.getElementById('d-state').textContent = STATE_LABEL[bucket(p)] || bucket(p);
     document.getElementById('d-name').textContent = p.name;
+    const clusterEl = document.getElementById('d-cluster');
+    clusterEl.hidden = !p.cluster;
+    clusterEl.textContent = p.cluster || '';
     document.getElementById('d-body').innerHTML = renderMarkdown(p.body || '');
     const at = p.applies_to || {};
     const scope = [at.tool, at.project, at.glob].filter(x => x && x !== '*').join(' · ') || 'everywhere';
@@ -439,12 +461,13 @@
     const targetEl = document.getElementById('d-target');
     targetEl.hidden = !hasTarget;
     targetEl.textContent = hasTarget ? p.target : '';
+    // secondary meta only (state + cluster now live in the header row)
     const via = [p.agent, p.author].filter(x => x && x !== 'unknown' && x !== 'anon').join(' · ');
+    const occ = p.occurrences || 0;
     document.getElementById('d-chips').innerHTML = [
-      [STATE_LABEL[p.state] || p.state, false], [p.cluster, true],
-      [`${p.occurrences || 0} occurrence${p.occurrences == 1 ? '' : 's'}`, false], [scope, false],
-      [via ? `via ${via}` : '', false],
-    ].filter(([t]) => Boolean(t)).map(([t, c]) => `<span class="chip${c ? ' cluster' : ''}">${escapeHtml(t)}</span>`).join('');
+      `${occ} occurrence${occ == 1 ? '' : 's'}`, scope,
+      p.tier === 'repo' ? 'team · repo store' : '', via ? `via ${via}` : '',
+    ].filter(Boolean).map(t => `<span class="chip">${escapeHtml(t)}</span>`).join('');
     const d = effDecision(p);
     document.getElementById('d-accept').classList.toggle('active', d === 'accepted');
     document.getElementById('d-reject').classList.toggle('active', d === 'rejected');
