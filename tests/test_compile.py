@@ -161,21 +161,26 @@ Team rule that lives in the repo store.
 
         compile_mod.main()
 
-        agents_repo = Path("AGENTS.md").read_text()
-        assert "Team rule that lives in the repo store" in agents_repo, "repo-tier pattern must compile regardless of project scope"
+        all_cluster_text = "".join(p.read_text() for p in Path("patternity").glob("*.md"))
+        assert "Team rule that lives in the repo store" in all_cluster_text, "repo-tier pattern must compile regardless of project scope"
 
+        # rules now live in patternity/<cluster>.md; the tool files reference them
+        tooling = Path("patternity/tooling.md").read_text()
+        assert "Use uv for python scripts" in tooling, "adopted pattern missing from its cluster file"
         agents = Path("AGENTS.md").read_text()
-        assert "Use uv for python scripts" in agents, "adopted pattern missing from AGENTS.md"
-        assert "Should never appear" not in agents, "noticed pattern leaked into compiled output"
-        assert "Should not leak" not in agents, "out-of-scope project pattern leaked in"
-        assert "Accepted despite only being noticed" in agents, "decision:accepted should compile even at noticed"
-        assert "Rejected even though it reached adopted" not in agents, "decision:rejected must never compile"
+        assert "patternity/tooling.md" in agents, "AGENTS.md should reference the cluster file"
+        assert "Use uv for python scripts" not in agents, "AGENTS.md should reference, not inline, the rule"
+        all_clusters = "".join(p.read_text() for p in Path("patternity").glob("*.md"))
+        assert "Should never appear" not in all_clusters, "noticed pattern leaked into compiled output"
+        assert "Should not leak" not in all_clusters, "out-of-scope project pattern leaked in"
+        assert "Accepted despite only being noticed" in all_clusters, "decision:accepted should compile even at noticed"
+        assert "Rejected even though it reached adopted" not in all_clusters, "decision:rejected must never compile"
 
         claude = Path("CLAUDE.md").read_text()
         assert "Always use tabs, never spaces." not in claude, "override did not remove target text"
 
         cursor_rule = Path(".cursor/rules/patternity-learned.mdc").read_text()
-        assert "Use uv for python scripts" in cursor_rule
+        assert "patternity/tooling.md" in cursor_rule, "cursor rule should reference the cluster file"
 
         copilot = Path(".github/instructions/patternity-learned.instructions.md").read_text()
         assert "applyTo" in copilot

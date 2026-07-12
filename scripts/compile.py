@@ -65,9 +65,37 @@ def load_adopted(project: str) -> tuple[list[dict], list[dict]]:
     return additive, overrides
 
 
+CLUSTER_DIR = Path("patternity")  # per-repo output dir; the "extra files" the tool configs reference
+
+
 def bullet(p: dict) -> str:
     first_line = p["body"].splitlines()[0] if p["body"] else p["name"]
     return f"- {first_line} _({p['name']})_"
+
+
+def cluster_of(p: dict) -> str:
+    return p.get("cluster") or "general"
+
+
+def write_cluster_files(additive: list[dict]) -> list[tuple[str, Path]]:
+    """Write one file per cluster under patternity/ — the single source the
+    tool configs reference, instead of inlining rules into CLAUDE.md etc.
+    Owns the whole patternity/ dir: stale cluster files are removed so it
+    stays idempotent."""
+    if CLUSTER_DIR.exists():
+        for old in CLUSTER_DIR.glob("*.md"):
+            old.unlink()
+    by_cluster: dict[str, list[dict]] = {}
+    for p in additive:
+        by_cluster.setdefault(cluster_of(p), []).append(p)
+    written = []
+    for cluster, ps in sorted(by_cluster.items()):
+        CLUSTER_DIR.mkdir(exist_ok=True)
+        path = CLUSTER_DIR / f"{cluster}.md"
+        path.write_text(f"# {cluster}\n\n_Learned by patternity. Generated — edit patterns in the store, not here._\n\n"
+                        + "\n".join(bullet(p) for p in ps) + "\n")
+        written.append((cluster, path))
+    return written
 
 
 def replace_marked_section(path: Path, section_body: str, header: str) -> None:
@@ -83,26 +111,27 @@ def replace_marked_section(path: Path, section_body: str, header: str) -> None:
     path.write_text(text)
 
 
-def write_markdown_targets(additive: list[dict]) -> list[Path]:
-    body = "\n".join(bullet(p) for p in additive) if additive else "_(none adopted yet)_"
-    written = []
-    for target in (Path("AGENTS.md"), Path("CLAUDE.md")):
-        replace_marked_section(target, body, "## Learned patterns (patternity)")
-        written.append(target)
-    return written
+def write_markdown_targets(clusters: list[tuple[str, Path]]) -> list[Path]:
+    # CLAUDE.md uses @-imports (Claude Code inlines them at load); AGENTS.md
+    # uses plain links. Either way the rules live in patternity/<cluster>.md,
+    # not inline here.
+    claude_body = "\n".join(f"@{path.as_posix()}" for _, path in clusters) or "_(none adopted yet)_"
+    agents_body = "\n".join(f"- [{cl}]({path.as_posix()})" for cl, path in clusters) or "_(none adopted yet)_"
+    replace_marked_section(Path("CLAUDE.md"), claude_body, "## Learned patterns (patternity)")
+    replace_marked_section(Path("AGENTS.md"), agents_body, "## Learned patterns (patternity)")
+    return [Path("CLAUDE.md"), Path("AGENTS.md")]
 
 
-def write_cursor_rule(additive: list[dict]) -> Path:
-    globs = ",".join(sorted({p["applies_to"].get("glob", "**/*") for p in additive})) or "**/*"
-    always = any(p["applies_to"].get("tool") in ("*", "cursor") for p in additive)
-    body = "\n".join(bullet(p) for p in additive) if additive else "_(none adopted yet)_"
+def write_cursor_rule(clusters: list[tuple[str, Path]]) -> Path:
+    body = "\n".join(f"- @{path.as_posix()}" for _, path in clusters) or "_(none adopted yet)_"
     content = (
         "---\n"
-        f"description: Patterns learned by patternity\n"
-        f"alwaysApply: {'true' if always else 'false'}\n"
-        f"globs: {globs}\n"
+        "description: Patterns learned by patternity (see referenced files)\n"
+        "alwaysApply: true\n"
+        "globs: **/*\n"
         "---\n\n"
         "## Learned patterns (patternity)\n\n"
+        "Follow the conventions in these files:\n\n"
         f"{body}\n"
     )
     path = Path(".cursor/rules/patternity-learned.mdc")
@@ -111,14 +140,14 @@ def write_cursor_rule(additive: list[dict]) -> Path:
     return path
 
 
-def write_copilot_instructions(additive: list[dict]) -> Path:
-    globs = ",".join(sorted({p["applies_to"].get("glob", "**/*") for p in additive})) or "**/*"
-    body = "\n".join(bullet(p) for p in additive) if additive else "_(none adopted yet)_"
+def write_copilot_instructions(clusters: list[tuple[str, Path]]) -> Path:
+    body = "\n".join(f"- [{cl}]({path.as_posix()})" for cl, path in clusters) or "_(none adopted yet)_"
     content = (
         "---\n"
-        f"applyTo: \"{globs}\"\n"
+        "applyTo: \"**\"\n"
         "---\n\n"
         "## Learned patterns (patternity)\n\n"
+        "Follow the conventions documented in these files:\n\n"
         f"{body}\n"
     )
     path = Path(".github/instructions/patternity-learned.instructions.md")
@@ -204,12 +233,14 @@ def main() -> None:
 
     additive, overrides = load_adopted(project)
     applied, unresolved = apply_overrides(overrides)
-    written += write_markdown_targets(additive)
-    written += [write_cursor_rule(additive), write_copilot_instructions(additive)]
+    clusters = write_cluster_files(additive)   # single source: patternity/<cluster>.md
+    written += [p for _, p in clusters]
+    written += write_markdown_targets(clusters)  # tool configs just reference them
+    written += [write_cursor_rule(clusters), write_copilot_instructions(clusters)]
     if unresolved:
         write_overrides_report(unresolved)
 
-    print(f"[{project}] compiled {len(additive)} pattern(s), {len(applied)} override(s) applied, {len(unresolved)} unresolved")
+    print(f"[{project}] compiled {len(additive)} pattern(s) into {len(clusters)} cluster file(s), {len(applied)} override(s) applied, {len(unresolved)} unresolved")
     for w in written:
         print(f"  wrote {w}")
 

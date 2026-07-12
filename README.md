@@ -79,14 +79,14 @@ stateDiagram-v2
    every promotion lands as a visible, revertible git diff on the *compiled*
    files, not a pre-compile review queue.
 4. **Compile** — the instant a pattern reaches `adopted`, the skill runs
-   `scripts/compile.py`, which renders every adopted pattern into each tool's
-   native format for the current project: `AGENTS.md`, `CLAUDE.md`,
-   `.cursor/rules/patternity-learned.mdc`,
-   `.github/instructions/patternity-learned.instructions.md`. Deterministic
-   templating, no AI, idempotent (re-running just replaces the marked
-   section) — so instructions/skills/agents stay dynamically in sync with
-   what's actually been learned, instead of stale until someone remembers to
-   run a script.
+   `scripts/compile.py`, which writes the rules to modular per-cluster files
+   in the repo (`patternity/<cluster>.md` — one file per cluster, the single
+   source), then makes each tool config *reference* them rather than inlining
+   the rules: `CLAUDE.md` gets `@patternity/<cluster>.md` imports, `AGENTS.md`
+   and the Cursor/Copilot rule files get links. So your curated files stay a
+   short pointer block, not a growing dump. Deterministic, no AI, idempotent
+   (re-running replaces the marked section and rewrites `patternity/`) — so
+   instructions stay in sync with what's been learned instead of stale.
 
 ## The structured index
 
@@ -207,13 +207,34 @@ that raw grep can't. Search is computed on demand with no index or
 dependency — fine for a personal store; a cached index only matters if it
 ever grows into the thousands.
 
+## Two tiers: personal + team
+
+Patterns can live in two stores:
+
+- **Personal (per-user)** — `${PATTERNITY_HOME:-~/.patternity}/patterns/`.
+  Global, follows you across every repo. This is the default.
+- **Team (per-repo)** — `<git-root>/.patternity/patterns/`, committed with
+  the code. Conventions that belong to *this project*, shared with whoever
+  clones it. Add with `patternity.py add <name> --repo`.
+
+`compile.py` merges both: repo-tier patterns are always in scope for the
+repo they live in, personal ones are narrowed by `applies_to.project`, and
+a repo pattern wins if it shares a name with a personal one. Each pattern
+records its `agent` (which harness captured it) and `author` (git identity
+or `anon`), so in a shared store you can see who/what each came from.
+
+Gitignore for a repo that uses the team tier: commit `.patternity/patterns/`
+and the generated `patternity/`, but ignore the transient capture log —
+`.patternity/signal.jsonl` and `.patternity/state.json`.
+
 ## Fine-grained scoping
 
-The store is global, but a pattern doesn't have to apply everywhere:
-`applies_to.project` scopes a pattern to the repo(s) it's actually been seen
-in, and only widens to `"*"` once it's shown up across more than one
-project. `applies_to.tool`/`glob` scope by host and file pattern the same
-way.
+The personal store is global, but a pattern doesn't have to apply
+everywhere: `applies_to.project` scopes a pattern to the repo(s) it's
+actually been seen in, and only widens to `"*"` once it's shown up across
+more than one project. `applies_to.tool`/`glob` scope by host and file
+pattern the same way. (Repo-tier patterns skip this — they're implicitly
+scoped to their repo.)
 
 ## Overrides
 
