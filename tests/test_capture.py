@@ -28,6 +28,28 @@ def main() -> None:
         assert "stop using classes" in claude_record["user"]
         assert "switched to a function" in claude_record["assistant"]
 
+        # a turn triggered by a slash-command/skill (isMeta) must be skipped,
+        # not logged as user signal — and it must not reach back to the earlier
+        # real message and mis-pair it.
+        meta_tx = Path(tmp) / "meta.jsonl"
+        meta_tx.write_text(
+            json.dumps({"message": {"role": "user", "content": [{"text": "real earlier message"}]}}) + "\n"
+            + json.dumps({"message": {"role": "assistant", "content": [{"text": "reply"}]}}) + "\n"
+            + json.dumps({"isMeta": True, "message": {"role": "user", "content": [{"text": "Run `uv run scripts/patternity.py dashboard`"}]}}) + "\n"
+            + json.dumps({"message": {"role": "assistant", "content": [{"text": "opening dashboard"}]}}) + "\n"
+        )
+        assert capture_mod.build_record({"transcript_path": str(meta_tx), "cwd": tmp}) is None, \
+            "isMeta-triggered turn (slash command/skill) must not be captured"
+
+        # tool-output echo (tagged) also skipped
+        tag_tx = Path(tmp) / "tag.jsonl"
+        tag_tx.write_text(
+            json.dumps({"message": {"role": "user", "content": [{"text": "<bash-stdout>(no output)</bash-stdout>"}]}}) + "\n"
+            + json.dumps({"message": {"role": "assistant", "content": [{"text": "done"}]}}) + "\n"
+        )
+        assert capture_mod.build_record({"transcript_path": str(tag_tx), "cwd": tmp}) is None, \
+            "tagged tool-output turn must not be captured"
+
         cursor_record = capture_mod.build_record({"prompt": "always use uv", "workspace_roots": ["/tmp/proj"]})
         assert cursor_record["source"] == "cursor-prompt-hook"
         assert cursor_record["cwd"] == "/tmp/proj"

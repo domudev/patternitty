@@ -106,7 +106,14 @@ If any pattern newly reached `proven` in this pass, immediately run
 `uv run <patternity-repo>/scripts/compile.py` from the current project's
 root — don't wait for the user to ask, and don't ask them to approve first.
 That's what keeps CLAUDE.md/AGENTS.md/`.cursor/rules`/`.github/instructions`
-in sync with what's actually been learned instead of stale. Then tell the
-user in one line what changed and where (which files, which pattern) so they
-can look at the diff — informing them after the fact, not gating on
-approval before.
+in sync with what's actually been learned instead of stale.
+
+## Reporting — short, poignant, no BS
+
+Report like a ledger, not an essay. Rules:
+- One line per pattern touched: `name — state (n=N)` plus at most a short
+  clause of why. One line for what compiled/where.
+- No preamble, no restating these instructions, no narrating the files you
+  read, no justifying inaction beyond a brief clause.
+- Nothing to distill? Say it in one sentence and stop.
+- Never pad to sound thorough. If the whole report is one line, ship one line.

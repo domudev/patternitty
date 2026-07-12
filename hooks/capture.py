@@ -26,35 +26,60 @@ import time
 from pathlib import Path
 
 
-def from_claude_transcript(transcript_path: str) -> dict:
-    lines = Path(transcript_path).read_text().splitlines()
-    user_text = assistant_text = ""
-    for line in reversed(lines):
+# junk we must never treat as user signal: slash-command / skill / tool /
+# system-injected turns. Claude Code flags these with `isMeta: true`; the tag
+# list is a cheap backup for injected content that isn't flagged.
+JUNK_TAGS = (
+    "<command-name>", "<command-message>", "<command-args>", "<local-command",
+    "<bash-input>", "<bash-stdout>", "<bash-stderr>", "<task-notification>",
+    "<system-reminder>", "Base directory for this skill:",
+)
+
+
+def _text(entry: dict) -> str:
+    content = (entry.get("message", {}) or {}).get("content")
+    if isinstance(content, list):
+        return "".join(b.get("text", "") for b in content if isinstance(b, dict))
+    return content or ""
+
+
+def from_claude_transcript(transcript_path: str):
+    entries = []
+    for line in Path(transcript_path).read_text().splitlines():
         try:
-            entry = json.loads(line)
+            entries.append(json.loads(line))
         except json.JSONDecodeError:
             continue
-        msg = entry.get("message", {})
-        role = msg.get("role") or entry.get("type")
-        content = msg.get("content")
-        text = "".join(
-            block.get("text", "") for block in content if isinstance(block, dict)
-        ) if isinstance(content, list) else (content or "")
-        if role == "assistant" and not assistant_text:
-            assistant_text = text
-        elif role == "user" and not user_text:
-            user_text = text
-        if user_text and assistant_text:
-            break
-    return {"user": user_text[:2000], "assistant": assistant_text[:2000]}
+
+    assistant_text = next((_text(e) for e in reversed(entries)
+                           if ((e.get("message", {}) or {}).get("role") == "assistant") and _text(e)), "")
+
+    # The turn's trigger is the most recent user entry with real text (tool
+    # results are role=user but textless, so they're skipped). If that trigger
+    # is meta/injected, this whole turn is noise — skip it, don't reach back to
+    # an earlier real message and mis-pair it.
+    for e in reversed(entries):
+        role = (e.get("message", {}) or {}).get("role") or e.get("type")
+        if role != "user":
+            continue
+        text = _text(e).strip()
+        if not text:
+            continue
+        if e.get("isMeta") or text.startswith(JUNK_TAGS):
+            return None
+        return {"user": text[:2000], "assistant": assistant_text[:2000]}
+    return None
 
 
-def build_record(payload: dict) -> dict | None:
+def build_record(payload: dict):
     if "transcript_path" in payload:
         transcript_path = payload["transcript_path"]
         if not transcript_path or not Path(transcript_path).exists():
             return None
-        return {"source": "claude-stop-hook", "cwd": payload.get("cwd"), **from_claude_transcript(transcript_path)}
+        turn = from_claude_transcript(transcript_path)
+        if turn is None:
+            return None
+        return {"source": "claude-stop-hook", "cwd": payload.get("cwd"), **turn}
 
     if "prompt" in payload and "workspace_roots" in payload:
         roots = payload.get("workspace_roots") or ["."]
