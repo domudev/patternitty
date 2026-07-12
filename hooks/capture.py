@@ -11,7 +11,15 @@ in what their stdin payload looks like, not in what we do with it.
 - Claude Code `Stop`: payload has transcript_path -> pull last user/assistant text.
 - Cursor `beforeSubmitPrompt`: payload has prompt + workspace_roots.
 - Copilot `userPromptSubmitted`: payload has prompt + cwd/sessionId.
+
+Unlike the other scripts (which run via `uv` with requires-python>=3.11), this
+hook is invoked with the machine's bare `python3` — which can be old (3.9 on
+stock macOS). Keep it broadly compatible: `from __future__ import annotations`
+so PEP-604 (`X | None`) type hints don't get evaluated at def time, and no
+other 3.10+ syntax.
 """
+from __future__ import annotations
+
 import json
 import sys
 import time
