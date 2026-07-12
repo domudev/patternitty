@@ -1,9 +1,9 @@
 <p align="center">
   <img src="viz/logo.svg" width="300" alt="patternity">
   <br><br>
-  <b>DRY for your preferences. You said it once. That's enough.</b>
+  <b>DRY for your preferences.</b>
   <br>
-  <sub>It handles the nagging, not the knowing.</sub>
+  <sub>Say it once; it handles the nagging, not the knowing.</sub>
 </p>
 
 # You are lazy. That's the feature.
