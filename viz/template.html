@@ -50,7 +50,8 @@
   .brand { display: flex; align-items: center; gap: 12px; }
   .logo { flex: none; }
   h1 { font-family: var(--font-hand); font-size: 42px; margin: 0; font-weight: 700; line-height: 1; }
-  .sub { color: var(--text-secondary); font-size: 13.5px; margin: 8px 0 0; max-width: 46ch; }
+  .ver { align-self: flex-end; margin-bottom: 7px; font-size: 11px; color: var(--text-muted); }
+  .sub { color: var(--text-secondary); font-size: 13.5px; margin: 8px 0 0; max-width: 60ch; }
   .search {
     border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--card);
     color: var(--text-primary); padding: 10px 13px; font-size: 13px; min-width: 250px; font-family: inherit;
@@ -247,8 +248,9 @@
         <path d="M26 4 C29 9, 23 14, 26 19 C28 23, 24 25, 26 26" stroke="var(--rejected)"/>
       </svg>
       <h1>patternity</h1>
+      <span class="ver">v/*__PATTERNITY_VERSION__*/</span>
     </div>
-    <p class="sub">what it's noticed about how you work, from first sighting to something it now assumes.</p>
+    <p class="sub">DRY for your preferences. Scream at your agent once; it does the nagging from then on.</p>
   </div>
   <div class="controls">
     <input class="search" id="search" type="search" placeholder="search patterns…" autocomplete="off">

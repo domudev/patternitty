@@ -208,12 +208,18 @@ def write_viz(all_patterns: list[dict]) -> list[Path]:
         # a pattern body or the profile can't break out of the tag.
         return json.dumps(value).replace("<", "\\u003c")
 
+    try:
+        version = json.loads((REPO_ROOT / ".claude-plugin" / "plugin.json").read_text())["version"]
+    except Exception:
+        version = "?"
+
     template = (REPO_ROOT / "viz" / "template.html").read_text()
     html_path = patterns_dir() / "index.html"
     html_path.write_text(
         template
         .replace("/*__PATTERNITY_DATA__*/", embed(slim))
         .replace("/*__PATTERNITY_PROFILE__*/", embed(profile_text))
+        .replace("/*__PATTERNITY_VERSION__*/", version)
     )
     return [json_path, html_path]
 
