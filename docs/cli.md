@@ -1,22 +1,22 @@
 # CLI & server
 
-## `patternity.py` — the tool surface
+## `patternitty.py` — the tool surface
 
 An agent or skill queries and edits the store through one CLI, called via
 Bash — no MCP server, no daemon, identical across Claude Code / Cursor /
 Copilot:
 
 ```bash
-uv run scripts/patternity.py search "testing style"       # BM25, relevance-ranked
-uv run scripts/patternity.py search "TODO|FIXME" --regex   # structural / exact
-uv run scripts/patternity.py get uv-pref --json
-uv run scripts/patternity.py list --state adopted --json
-uv run scripts/patternity.py list --tier repo             # team-tier only
-uv run scripts/patternity.py add lint-on-save --cluster workflow --body "…"
-uv run scripts/patternity.py add team-rule --repo --body "…"   # committed team store
-uv run scripts/patternity.py bump uv-pref                  # +1 occurrence, re-derive state
-uv run scripts/patternity.py set uv-pref decision accepted # (--clear to remove)
-uv run scripts/patternity.py dashboard [--serve]
+uv run scripts/patternitty.py search "testing style"       # BM25, relevance-ranked
+uv run scripts/patternitty.py search "TODO|FIXME" --regex   # structural / exact
+uv run scripts/patternitty.py get uv-pref --json
+uv run scripts/patternitty.py list --state adopted --json
+uv run scripts/patternitty.py list --tier repo             # team-tier only
+uv run scripts/patternitty.py add lint-on-save --cluster workflow --body "…"
+uv run scripts/patternitty.py add team-rule --repo --body "…"   # committed team store
+uv run scripts/patternitty.py bump uv-pref                  # +1 occurrence, re-derive state
+uv run scripts/patternitty.py set uv-pref decision accepted # (--clear to remove)
+uv run scripts/patternitty.py dashboard [--serve]
 ```
 
 **The file format is the API; this CLI is sugar.** The store is plain

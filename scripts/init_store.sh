@@ -4,7 +4,7 @@
 # only if and when you decide to back it up.
 set -euo pipefail
 
-HOME_DIR="${PATTERNITY_HOME:-$HOME/.patternity}"
+HOME_DIR="${PATTERNITTY_HOME:-$HOME/.patternitty}"
 STORE="$HOME_DIR/patterns"
 mkdir -p "$STORE"
 
@@ -14,7 +14,7 @@ mkdir -p "$STORE"
 if [ ! -d "$HOME_DIR/.git" ]; then
   git -C "$HOME_DIR" init -q
   git -C "$HOME_DIR" add -A
-  git -C "$HOME_DIR" commit -q -m "patternity: initialize pattern store"
+  git -C "$HOME_DIR" commit -q -m "patternitty: initialize pattern store"
   echo "initialized git repo at $HOME_DIR"
 else
   echo "$HOME_DIR is already a git repo"

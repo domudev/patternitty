@@ -1,14 +1,14 @@
 # Dashboard
 
 Every `compile.py` run regenerates
-`${PATTERNITY_HOME:-~/.patternity}/patterns/index.html` — a Kanban board
+`${PATTERNITTY_HOME:-~/.patternitty}/patterns/index.html` — a Kanban board
 (**Noticed | Recurring | Adopted**) of every pattern, at every state, across
 every project. Open it:
 
 ```bash
-open ~/.patternity/patterns/index.html   # macOS; xdg-open on Linux
+open ~/.patternitty/patterns/index.html   # macOS; xdg-open on Linux
 # or, for interactive accept/reject:
-uv run scripts/patternity.py dashboard --serve
+uv run scripts/patternitty.py dashboard --serve
 ```
 
 It's a single self-contained file with data embedded inline (no server
@@ -48,7 +48,7 @@ automatic ladder.
 
 ## The profile panel
 
-If `${PATTERNITY_HOME:-~/.patternity}/patterns/PROFILE.md` exists, it renders
+If `${PATTERNITTY_HOME:-~/.patternitty}/patterns/PROFILE.md` exists, it renders
 as a summary panel above the board — the skill's narrative synthesis of
 adopted patterns grouped by cluster ("you default to uv over pip/venv, stated
 across multiple projects"). That's the "who is this user" digest; the board

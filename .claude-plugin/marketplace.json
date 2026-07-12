@@ -1,12 +1,12 @@
 {
-  "name": "patternity",
+  "name": "patternitty",
   "owner": {
     "name": "Dominik Müller",
     "url": "https://github.com/domudev"
   },
   "plugins": [
     {
-      "name": "patternity",
+      "name": "patternitty",
       "source": "./",
       "description": "Learns coding patterns from corrections, confirmations, and commit history, and distills them into reviewable agent instructions."
     }

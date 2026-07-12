@@ -1,0 +1,26 @@
+---
+description: This project uses patternitty to learn coding patterns from corrections and commit history
+alwaysApply: false
+---
+
+# patternitty
+
+Patterns learned about this user live at
+`${PATTERNITTY_HOME:-~/.patternitty}/patterns/` (see `patterns/_SCHEMA.md` in
+the patternitty repo), not in this project. Patterns that reached `state:
+adopted` are already compiled into `.cursor/rules/patternitty-learned.mdc` —
+you don't need to read the pattern store directly for those.
+
+A `beforeSubmitPrompt` hook (`.cursor/hooks.json`) already logs every prompt
+to `.patternitty/signal.jsonl` if its path placeholder has been pointed at a
+patternitty clone. If the user asks you to "run patternitty" or "distill
+patterns" here:
+
+1. Optionally run `uv run <patternitty-repo>/scripts/mine_git_history.py` to
+   add commit signal to `.patternitty/signal.jsonl` too.
+2. Read that file plus recent conversation, match against existing patterns
+   (bump `occurrences`/`state`) or create new `noticed` ones, following
+   `patterns/_SCHEMA.md`.
+3. If anything newly reached `adopted`, immediately run
+   `uv run <patternitty-repo>/scripts/compile.py` — don't wait for approval,
+   just report what changed afterward.

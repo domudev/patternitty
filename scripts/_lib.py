@@ -9,21 +9,21 @@ from pathlib import Path
 
 def patterns_dir() -> Path:
     """The per-USER store: personal, global, follows you across repos."""
-    home = os.environ.get("PATTERNITY_HOME", str(Path.home() / ".patternity"))
+    home = os.environ.get("PATTERNITTY_HOME", str(Path.home() / ".patternitty"))
     return Path(home) / "patterns"
 
 
 def repo_patterns_dir() -> Path | None:
     """The per-REPO store: team/project conventions committed with the code,
-    at <git-root>/.patternity/patterns/. None when not inside a git repo.
-    (Signal lives at <git-root>/.patternity/signal.jsonl and stays gitignored;
+    at <git-root>/.patternitty/patterns/. None when not inside a git repo.
+    (Signal lives at <git-root>/.patternitty/signal.jsonl and stays gitignored;
     only patterns/ is meant to be committed — see README.)"""
     try:
         root = subprocess.run(["git", "rev-parse", "--show-toplevel"], check=False,
                               capture_output=True, text=True, timeout=5).stdout.strip()
     except Exception:
         root = ""
-    return Path(root) / ".patternity" / "patterns" if root else None
+    return Path(root) / ".patternitty" / "patterns" if root else None
 
 
 def git_author() -> str:

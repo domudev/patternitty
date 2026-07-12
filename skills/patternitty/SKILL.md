@@ -1,16 +1,16 @@
 ---
-name: patternity
+name: patternitty
 description: >
   Learns the user's standing coding preferences so they stop repeating
   themselves, then compiles them into CLAUDE.md/AGENTS.md/.cursor/.github.
   Fire proactively (no command needed) whenever the user states a standing
   preference or repeats a correction ("always", "never", "stop doing", "use A
-  not B"); also on "patternity" / "/patternity" / "distill my patterns" and at
+  not B"); also on "patternitty" / "/patternitty" / "distill my patterns" and at
   session start. You judge: durable prefs yes, one-offs no.
 license: MIT
 ---
 
-# patternity
+# patternitty
 
 The user is lazy, proudly. They will not hand-write a CLAUDE.md, so you notice
 for them.
@@ -26,15 +26,15 @@ are the safety net).
 
 ## Store & tools
 
-Personal store: `${PATTERNITY_HOME:-~/.patternity}/patterns/`. Team store (if
-the repo has one): `<git-root>/.patternity/patterns/`. Prefer the CLI (keeps
+Personal store: `${PATTERNITTY_HOME:-~/.patternitty}/patterns/`. Team store (if
+the repo has one): `<git-root>/.patternitty/patterns/`. Prefer the CLI (keeps
 frontmatter valid); run from the plugin dir Claude Code exposes as
 `${CLAUDE_PLUGIN_ROOT}`:
 
-- `patternity.py search "<topic>"` : dedupe before creating.
-- `patternity.py add <name> --cluster <c> --agent <claude-code|cursor|copilot> --body "…"` (`--repo` for the team store).
-- `patternity.py bump <name>` : +1 occurrence, re-derives state.
-- `patternity.py set <name> <field> <value>` (or `--clear`).
+- `patternitty.py search "<topic>"` : dedupe before creating.
+- `patternitty.py add <name> --cluster <c> --agent <claude-code|cursor|copilot> --body "…"` (`--repo` for the team store).
+- `patternitty.py bump <name>` : +1 occurrence, re-derives state.
+- `patternitty.py set <name> <field> <value>` (or `--clear`).
 
 Only `name` is required; other fields default. No Python? edit the markdown
 directly, same result. Full schema: `patterns/_SCHEMA.md`.

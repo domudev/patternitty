@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>patternity</title>
+<title>patternitty</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
@@ -247,8 +247,8 @@
         <path d="M19 4 C16 8, 22 12, 19 17 C17 21, 21 24, 19 26" stroke="var(--adopted)"/>
         <path d="M26 4 C29 9, 23 14, 26 19 C28 23, 24 25, 26 26" stroke="var(--rejected)"/>
       </svg>
-      <h1>patternity</h1>
-      <span class="ver">v/*__PATTERNITY_VERSION__*/</span>
+      <h1>patternitty</h1>
+      <span class="ver">v/*__PATTERNITTY_VERSION__*/</span>
     </div>
     <p class="sub">DRY for your preferences. Scream at your agent once; it does the nagging from then on.</p>
   </div>
@@ -295,18 +295,18 @@
   <button id="tray-copy">Copy</button>
   <button id="tray-clear">Clear</button>
 </div>
-<script id="patternity-data" type="application/json">/*__PATTERNITY_DATA__*/</script>
-<script id="patternity-profile" type="application/json">/*__PATTERNITY_PROFILE__*/</script>
+<script id="patternitty-data" type="application/json">/*__PATTERNITTY_DATA__*/</script>
+<script id="patternitty-profile" type="application/json">/*__PATTERNITTY_PROFILE__*/</script>
 <script>
-  const DATA = JSON.parse(document.getElementById('patternity-data').textContent || '[]');
-  const PROFILE_MD = JSON.parse(document.getElementById('patternity-profile').textContent || '""');
+  const DATA = JSON.parse(document.getElementById('patternitty-data').textContent || '[]');
+  const PROFILE_MD = JSON.parse(document.getElementById('patternitty-profile').textContent || '""');
   const PAGE_SIZE = 6;
   const shown = { noticed: PAGE_SIZE, recurring: PAGE_SIZE, adopted: PAGE_SIZE };
   let query = '';
   // name -> target decision ('accepted' | 'rejected' | '') for this session,
   // overlaid on the stored decision until applied via decide.py.
   const pending = new Map();
-  // served by `patternity dashboard --serve`? then accept/reject persists
+  // served by `patternitty dashboard --serve`? then accept/reject persists
   // instantly via POST /decide; opened as a file:// it falls back to pending
   // + the copy-a-command tray.
   const SERVED = location.protocol === 'http:' || location.protocol === 'https:';
@@ -439,7 +439,7 @@
     const tray = document.getElementById('tray');
     tray.hidden = SERVED || tokens.length === 0;  // served mode persists directly — no tray
     if (!SERVED && tokens.length) document.getElementById('tray-cmd').textContent =
-      `uv run <patternity-repo>/scripts/decide.py ${tokens.join(' ')}`;
+      `uv run <patternitty-repo>/scripts/decide.py ${tokens.join(' ')}`;
   }
 
   document.getElementById('search').addEventListener('input', e => {
@@ -465,7 +465,7 @@
     });
   }
 
-  // tiny markdown renderer — just the subset patternity emits (headings,
+  // tiny markdown renderer — just the subset patternitty emits (headings,
   // bullets, **bold**, `code`), escaped-first so it can't inject HTML. Not a
   // general parser; enough for pattern bodies and PROFILE.md.
   function mdInline(s) {

@@ -3,17 +3,17 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Mine commit messages + diffstat since the last run into .patternity/signal.jsonl.
+"""Mine commit messages + diffstat since the last run into .patternitty/signal.jsonl.
 
-Run from inside the project you want patternity to learn from:
-    uv run /path/to/patternity/scripts/mine_git_history.py
+Run from inside the project you want patternitty to learn from:
+    uv run /path/to/patternitty/scripts/mine_git_history.py
 """
 import json
 import subprocess
 from pathlib import Path
 
-STATE_FILE = Path(".patternity/state.json")
-SIGNAL_FILE = Path(".patternity/signal.jsonl")
+STATE_FILE = Path(".patternitty/state.json")
+SIGNAL_FILE = Path(".patternitty/signal.jsonl")
 
 
 def git(*args: str) -> str:
@@ -21,7 +21,7 @@ def git(*args: str) -> str:
 
 
 def main() -> None:
-    Path(".patternity").mkdir(exist_ok=True)
+    Path(".patternitty").mkdir(exist_ok=True)
     state = json.loads(STATE_FILE.read_text()) if STATE_FILE.exists() else {}
     since_sha = state.get("last_mined_sha")
 

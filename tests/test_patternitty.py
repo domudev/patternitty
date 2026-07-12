@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Self-check for scripts/patternity.py: BM25 ranks by relevance, regex
+"""Self-check for scripts/patternitty.py: BM25 ranks by relevance, regex
 matches structurally, and add/set/bump edit the store correctly."""
 import importlib.util
 import io
@@ -13,7 +13,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-spec = importlib.util.spec_from_file_location("patternity_mod", REPO_ROOT / "scripts" / "patternity.py")
+spec = importlib.util.spec_from_file_location("patternitty_mod", REPO_ROOT / "scripts" / "patternitty.py")
 pat = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(pat)
 
@@ -27,7 +27,7 @@ def run(argv):
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as home:
-        os.environ["PATTERNITY_HOME"] = home
+        os.environ["PATTERNITTY_HOME"] = home
         patterns = Path(home) / "patterns"
         patterns.mkdir()
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Wire patternity's capture hooks into a target project for Cursor/Copilot.
+# Wire patternitty's capture hooks into a target project for Cursor/Copilot.
 # Claude Code has a real install command (/plugin ...) so there's nothing to
 # copy for it — this script only handles the two hosts that need files
 # placed directly in the target repo.
@@ -13,24 +13,24 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 install_cursor() {
   mkdir -p "$TARGET/.cursor/rules"
-  cp "$REPO_DIR/.cursor/rules/patternity.mdc" "$TARGET/.cursor/rules/patternity.mdc"
+  cp "$REPO_DIR/.cursor/rules/patternitty.mdc" "$TARGET/.cursor/rules/patternitty.mdc"
   if [ -f "$TARGET/.cursor/hooks.json" ]; then
     echo "skipped $TARGET/.cursor/hooks.json (already exists) — add this manually:"
-    sed "s|<path-to-patternity-clone>|$REPO_DIR|" "$REPO_DIR/.cursor/hooks.json"
+    sed "s|<path-to-patternitty-clone>|$REPO_DIR|" "$REPO_DIR/.cursor/hooks.json"
   else
-    sed "s|<path-to-patternity-clone>|$REPO_DIR|" "$REPO_DIR/.cursor/hooks.json" > "$TARGET/.cursor/hooks.json"
+    sed "s|<path-to-patternitty-clone>|$REPO_DIR|" "$REPO_DIR/.cursor/hooks.json" > "$TARGET/.cursor/hooks.json"
     echo "wrote $TARGET/.cursor/hooks.json"
   fi
-  echo "wrote $TARGET/.cursor/rules/patternity.mdc"
+  echo "wrote $TARGET/.cursor/rules/patternitty.mdc"
 }
 
 install_copilot() {
   mkdir -p "$TARGET/.github/hooks"
-  if [ -f "$TARGET/.github/hooks/patternity-capture.json" ]; then
-    echo "skipped $TARGET/.github/hooks/patternity-capture.json (already exists)"
+  if [ -f "$TARGET/.github/hooks/patternitty-capture.json" ]; then
+    echo "skipped $TARGET/.github/hooks/patternitty-capture.json (already exists)"
   else
-    sed "s|<path-to-patternity-clone>|$REPO_DIR|" "$REPO_DIR/.github/hooks/patternity-capture.json" > "$TARGET/.github/hooks/patternity-capture.json"
-    echo "wrote $TARGET/.github/hooks/patternity-capture.json"
+    sed "s|<path-to-patternitty-clone>|$REPO_DIR|" "$REPO_DIR/.github/hooks/patternitty-capture.json" > "$TARGET/.github/hooks/patternitty-capture.json"
+    echo "wrote $TARGET/.github/hooks/patternitty-capture.json"
   fi
   if [ -f "$TARGET/.github/copilot-instructions.md" ]; then
     echo "skipped $TARGET/.github/copilot-instructions.md (already exists) — append this manually:"

@@ -1,5 +1,5 @@
 {
-  "name": "patternity",
+  "name": "patternitty",
   "version": "0.3.3",
   "description": "Learns coding patterns from corrections, confirmations, and commit history, and distills them into reviewable agent instructions.",
   "author": {

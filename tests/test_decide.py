@@ -26,7 +26,7 @@ def field(text: str, key: str) -> str | None:
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as home:
-        os.environ["PATTERNITY_HOME"] = home
+        os.environ["PATTERNITTY_HOME"] = home
         patterns = Path(home) / "patterns"
         patterns.mkdir()
         (patterns / "foo.md").write_text("""---

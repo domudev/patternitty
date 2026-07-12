@@ -2,7 +2,7 @@
 """Shared capture hook for Claude Code, Cursor, and Copilot.
 
 Deliberately dumb — no classification here, just append raw signal to
-.patternity/signal.jsonl. The patternity skill (an LLM call) does the
+.patternitty/signal.jsonl. The patternitty skill (an LLM call) does the
 interpretation later. Never raises: a broken hook must not block the agent.
 
 One script instead of three near-identical ones: the three hosts differ only
@@ -99,7 +99,7 @@ def main() -> int:
             return 0
         record["ts"] = time.time()
 
-        out_dir = Path(record.pop("cwd") or ".") / ".patternity"
+        out_dir = Path(record.pop("cwd") or ".") / ".patternitty"
         out_dir.mkdir(exist_ok=True)
         with open(out_dir / "signal.jsonl", "a") as f:
             f.write(json.dumps(record) + "\n")
