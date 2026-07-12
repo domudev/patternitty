@@ -48,7 +48,10 @@ Schema: `patterns/_SCHEMA.md`. The structured index is `index.json`
 maintain it by hand).
 
 **Prefer the `patternity.py` CLI over hand-editing files** when it fits — it
-keeps frontmatter valid and the occurrence ladder consistent:
+keeps frontmatter valid and the occurrence ladder consistent. Run the scripts
+from the plugin's install dir, which Claude Code exposes as
+`${CLAUDE_PLUGIN_ROOT}` (e.g. `uv run "${CLAUDE_PLUGIN_ROOT}/scripts/patternity.py" …`);
+don't search the filesystem for the repo.
 - `patternity.py search "<topic>"` (BM25, relevance-ranked) or `--regex` —
   check whether a matching pattern already exists before creating a new one.
 - `patternity.py get <name> --json`, `list [--state/--cluster] --json`.
@@ -108,7 +111,7 @@ For each piece of signal:
 ## Dynamic reflection
 
 If any pattern newly reached `adopted` in this pass, immediately run
-`uv run <patternity-repo>/scripts/compile.py` from the current project's
+`uv run "${CLAUDE_PLUGIN_ROOT}/scripts/compile.py"` from the current project's
 root — don't wait for the user to ask, and don't ask them to approve first.
 That's what keeps CLAUDE.md/AGENTS.md/`.cursor/rules`/`.github/instructions`
 in sync with what's actually been learned instead of stale.
