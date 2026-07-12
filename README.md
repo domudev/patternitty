@@ -131,23 +131,27 @@ open ~/.patternity/patterns/index.html   # macOS; xdg-open on Linux
 
 `index.json` next to it is the same data in plain structured form, for
 anything else you want to build on top (a CLI summary, a different view).
-Each state gets its own pastel wash (slate → amber → green) rather than one
-hue at different lightness, so the board reads at a glance instead of
-requiring you to compare shades; `type: override` patterns get a small solid
-badge (not a tinted overlay, so it stays legible regardless of which state's
-background it sits on) instead of a recolored card, since it's a different
-variable. Occurrence count shows as three small dots, filled up to the
-pattern's count. `cluster` shows as a small chip on the card itself.
-Clicking a card (or Enter/Space when it's focused) opens a detail view with
-the full body text, not just the truncated first line — useful once a
-pattern's "why" runs longer than one line, or for reading an override's full
-suppressed-text target.
+The board is dark-only (no light theme) — chrome, ink, and state colors all
+come from the dataviz skill's validated dark-surface reference palette
+rather than hand-picked values: page/surface/text from its "chart chrome &
+ink" steps, and each state's wash from its dark categorical/status hues
+(blue for observed, warning-amber for suspect, good-green for proven),
+blended onto the surface at area-fill opacity rather than flattened into
+pastel HSL. `type: override` patterns get a small solid badge in a fourth,
+reserved accent (violet) instead of a recolored card, so it never gets
+confused for a state and stays legible regardless of which state's
+background it sits on. Occurrence count shows as three small dots, filled
+up to the pattern's count. `cluster` shows as a small chip on the card
+itself. Clicking a card (or Enter/Space when it's focused) opens a detail
+view with the full body text, not just the truncated first line — useful
+once a pattern's "why" runs longer than one line, or for reading an
+override's full suppressed-text target.
 
-Dark mode is an explicit toggle in the header (persisted per-browser via
-`localStorage`), seeded from the OS preference on first load rather than
-silently depending on it — open the file once and you'll always have a
-visible way to switch, whether or not you knew your OS was already in dark
-mode.
+The header title, column/profile headings, card/dialog titles, and cluster
+chips use Caveat (a handwriting webfont) as a one-off flourish; everything
+else read as data — body/"why" text, state and scope chips, occurrence
+counts — stays in Inter, a plain, small-size-legible sans. Both load from
+Google Fonts with a system-font fallback if offline.
 
 If `${PATTERNITY_HOME:-~/.patternity}/patterns/PROFILE.md` exists, it's
 rendered as a summary panel above the board — the skill's synthesis of
