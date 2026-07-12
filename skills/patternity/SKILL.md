@@ -7,7 +7,7 @@ description: >
   patterns through observed -> suspect -> proven as they recur, clusters them
   into a synthesized PROFILE.md, and compiles proven ones into
   CLAUDE.md/AGENTS.md/.cursor/.github instructions right away. Use when the
-  user says "patternity", "/patternity-distill", "learn my patterns",
+  user says "patternity", "/patternity", "learn my patterns",
   "distill patterns", or asks what patternity has observed/proven/learned
   about them. Also use proactively at the start of a session if
   .patternity/signal.jsonl has grown substantially since the walking doc was

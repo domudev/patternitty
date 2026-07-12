@@ -261,7 +261,7 @@ uv run /path/to/patternity/scripts/mine_git_history.py
 # ... use Claude Code/Cursor/Copilot for a while; hooks log signal automatically ...
 
 # ask your agent to run the patternity skill, e.g.:
-#   /patternity-distill
+#   /patternity        (or just "distill my patterns")
 # proven patterns compile automatically; check `git diff` in your project
 ```
 
@@ -279,7 +279,7 @@ uv run /path/to/patternity/scripts/mine_git_history.py
 ## Repo layout
 
 - `skills/patternity/SKILL.md` — canonical distillation/promotion logic
-- `commands/` — `/patternity-distill`, `/patternity-compile`, `/patternity-dashboard` slash commands
+- `commands/` — `/patternity:compile`, `/patternity:dashboard` slash commands (distillation is the `patternity` skill itself, invoked as `/patternity` or auto-triggered)
 - `hooks/` — shared capture hook wired into Claude Code, Cursor, and Copilot
 - `scripts/` — `patternity.py` (agent-facing search/read/write/dashboard CLI), `compile.py`, `mine_git_history.py`, `decide.py` (apply accept/reject decisions), shared `_lib.py` parser (plain `uv run` scripts, no project/deps needed), plus `install.sh` (wires Cursor/Copilot into a target project) and `init_store.sh` (git-inits the personal pattern store)
 - `patterns/` — schema doc + reference example (the real store is `${PATTERNITY_HOME:-~/.patternity}/patterns/`)
