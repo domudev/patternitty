@@ -2,7 +2,7 @@
   "hooks": {
     "beforeSubmitPrompt": [
       {
-        "command": "python3 <path-to-patternity-clone>/hooks/capture.py"
+        "command": "python3 <path-to-patternitty-clone>/hooks/capture.py"
       }
     ]
   }

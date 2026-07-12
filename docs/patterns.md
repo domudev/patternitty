@@ -13,17 +13,17 @@ is a name + a body.
 
 | Tier | Location | For |
 |---|---|---|
-| **Personal** (default) | `${PATTERNITY_HOME:-~/.patternity}/patterns/` | your preferences, global across every repo |
-| **Team** | `<git-root>/.patternity/patterns/` (committed) | conventions that belong to *this project*, shared with whoever clones it |
+| **Personal** (default) | `${PATTERNITTY_HOME:-~/.patternitty}/patterns/` | your preferences, global across every repo |
+| **Team** | `<git-root>/.patternitty/patterns/` (committed) | conventions that belong to *this project*, shared with whoever clones it |
 
-Add a team pattern with `patternity.py add <name> --repo`. `compile.py`
+Add a team pattern with `patternitty.py add <name> --repo`. `compile.py`
 merges both: repo-tier patterns are always in scope for their repo; personal
 ones are narrowed by `applies_to.project`; a repo pattern wins on a name
 clash.
 
-**Gitignore for a repo using the team tier:** commit `.patternity/patterns/`
-and the generated `patternity/`, but ignore the transient capture log
-(`.patternity/signal.jsonl`, `.patternity/state.json`).
+**Gitignore for a repo using the team tier:** commit `.patternitty/patterns/`
+and the generated `patternitty/`, but ignore the transient capture log
+(`.patternitty/signal.jsonl`, `.patternitty/state.json`).
 
 ## Provenance
 
@@ -45,7 +45,7 @@ to their repo.)
 `cluster` groups patterns by theme (tooling, code-style, workflow, …). The
 skill reuses an existing cluster when a pattern fits one and mints a new one
 only when nothing does, keeping the set small. Clusters drive both the
-per-cluster compiled files (`patternity/<cluster>.md`) and the synthesized
+per-cluster compiled files (`patternitty/<cluster>.md`) and the synthesized
 `PROFILE.md` narrative.
 
 ## Overrides

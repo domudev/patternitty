@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""patternity — the agent-facing query/edit surface over the pattern store.
+"""patternitty — the agent-facing query/edit surface over the pattern store.
 
 This is an accelerator, not the only door: the store is plain markdown, so an
 agent with no Python can grep/read/write the files directly (see
@@ -19,7 +19,7 @@ Write:  add <name> [--type T] [--cluster C] [--tool T] [--project P] [--body "�
 View:   dashboard [--serve]                  (open index.html; --serve adds
                                              instant accept/reject write-back)
 
-All commands operate on ${PATTERNITY_HOME:-~/.patternity}/patterns/.
+All commands operate on ${PATTERNITTY_HOME:-~/.patternitty}/patterns/.
 """
 import argparse
 import json
@@ -122,7 +122,7 @@ def add_pattern(name, type="feedback", cluster=None, tool="*", project="*", agen
     path = directory / f"{name}.md"
     if path.exists():
         raise FileExistsError(name)
-    agent = agent or os.environ.get("PATTERNITY_AGENT") or "unknown"
+    agent = agent or os.environ.get("PATTERNITTY_AGENT") or "unknown"
     author = git_author()
     fm = [
         f"name: {name}", f"type: {type}", "state: noticed", "occurrences: 1",
@@ -272,7 +272,7 @@ ROUTES = {
 
 
 def _open(url_or_path) -> None:
-    if os.environ.get("PATTERNITY_NO_OPEN"):
+    if os.environ.get("PATTERNITTY_NO_OPEN"):
         return  # headless / tests
     opener = {"darwin": "open", "win32": "start"}.get(sys.platform, "xdg-open")
     subprocess.run([opener, str(url_or_path)], shell=(opener == "start"), check=False)
@@ -331,11 +331,11 @@ def cmd_dashboard(args) -> int:
 
     # random free port by default (0 = OS picks) so it never clashes with
     # whatever's already running; the server opens the browser itself, so the
-    # port doesn't need to be known ahead of time. Override with PATTERNITY_PORT.
-    port = int(os.environ.get("PATTERNITY_PORT", "0"))
+    # port doesn't need to be known ahead of time. Override with PATTERNITTY_PORT.
+    port = int(os.environ.get("PATTERNITTY_PORT", "0"))
     server = HTTPServer(("127.0.0.1", port), Handler)
     url = f"http://127.0.0.1:{server.server_address[1]}/"
-    print(f"serving patternity dashboard at {url}  (Ctrl-C to stop)", flush=True)
+    print(f"serving patternitty dashboard at {url}  (Ctrl-C to stop)", flush=True)
     _open(url)
     try:
         server.serve_forever()
@@ -345,7 +345,7 @@ def cmd_dashboard(args) -> int:
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(prog="patternity", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(prog="patternitty", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("search"); s.add_argument("query"); s.add_argument("--regex", action="store_true"); s.add_argument("--limit", type=int, default=10); s.add_argument("--json", action="store_true"); s.set_defaults(fn=cmd_search)

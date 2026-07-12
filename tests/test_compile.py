@@ -25,7 +25,7 @@ def write(path: Path, content: str) -> None:
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as home, tempfile.TemporaryDirectory() as project:
-        os.environ["PATTERNITY_HOME"] = home
+        os.environ["PATTERNITTY_HOME"] = home
         patterns = Path(home) / "patterns"
 
         write(patterns / "adopted-one.md", """---
@@ -145,7 +145,7 @@ Mentions a literal </script> tag in prose, which must not break index.html.
         # because repo-tier patterns belong to this repo regardless of scope.
         import subprocess
         subprocess.run(["git", "init", "-q"], cwd=project_dir, check=False)
-        write(project_dir / ".patternity" / "patterns" / "team-convention.md", """---
+        write(project_dir / ".patternitty" / "patterns" / "team-convention.md", """---
 name: team-convention
 type: project
 state: adopted
@@ -161,16 +161,16 @@ Team rule that lives in the repo store.
 
         compile_mod.main()
 
-        all_cluster_text = "".join(p.read_text() for p in Path("patternity").glob("*.md"))
+        all_cluster_text = "".join(p.read_text() for p in Path("patternitty").glob("*.md"))
         assert "Team rule that lives in the repo store" in all_cluster_text, "repo-tier pattern must compile regardless of project scope"
 
-        # rules now live in patternity/<cluster>.md; the tool files reference them
-        tooling = Path("patternity/tooling.md").read_text()
+        # rules now live in patternitty/<cluster>.md; the tool files reference them
+        tooling = Path("patternitty/tooling.md").read_text()
         assert "Use uv for python scripts" in tooling, "adopted pattern missing from its cluster file"
         agents = Path("AGENTS.md").read_text()
-        assert "patternity/tooling.md" in agents, "AGENTS.md should reference the cluster file"
+        assert "patternitty/tooling.md" in agents, "AGENTS.md should reference the cluster file"
         assert "Use uv for python scripts" not in agents, "AGENTS.md should reference, not inline, the rule"
-        all_clusters = "".join(p.read_text() for p in Path("patternity").glob("*.md"))
+        all_clusters = "".join(p.read_text() for p in Path("patternitty").glob("*.md"))
         assert "Should never appear" not in all_clusters, "noticed pattern leaked into compiled output"
         assert "Should not leak" not in all_clusters, "out-of-scope project pattern leaked in"
         assert "Accepted despite only being noticed" in all_clusters, "decision:accepted should compile even at noticed"
@@ -179,10 +179,10 @@ Team rule that lives in the repo store.
         claude = Path("CLAUDE.md").read_text()
         assert "Always use tabs, never spaces." not in claude, "override did not remove target text"
 
-        cursor_rule = Path(".cursor/rules/patternity-learned.mdc").read_text()
-        assert "patternity/tooling.md" in cursor_rule, "cursor rule should reference the cluster file"
+        cursor_rule = Path(".cursor/rules/patternitty-learned.mdc").read_text()
+        assert "patternitty/tooling.md" in cursor_rule, "cursor rule should reference the cluster file"
 
-        copilot = Path(".github/instructions/patternity-learned.instructions.md").read_text()
+        copilot = Path(".github/instructions/patternitty-learned.instructions.md").read_text()
         assert "applyTo" in copilot
 
         index_json = json.loads((Path(home) / "patterns" / "index.json").read_text())
@@ -198,19 +198,19 @@ Team rule that lives in the repo store.
             "repo-tier patterns should be tagged tier=repo"
 
         index_html = (Path(home) / "patterns" / "index.html").read_text()
-        assert "__PATTERNITY_DATA__" not in index_html, "template placeholder was not substituted"
-        assert "__PATTERNITY_PROFILE__" not in index_html, "profile placeholder was not substituted"
+        assert "__PATTERNITTY_DATA__" not in index_html, "template placeholder was not substituted"
+        assert "__PATTERNITTY_PROFILE__" not in index_html, "profile placeholder was not substituted"
         assert "noticed-one" in index_html, "embedded data missing from index.html"
         assert "You default to uv" in index_html, "PROFILE.md content missing from index.html"
 
         def tag_content(tag_id: str) -> str:
             return index_html.split(f'id="{tag_id}"', 1)[1].split(">", 1)[1].split("</script>", 1)[0]
 
-        for tag_id in ("patternity-data", "patternity-profile"):
+        for tag_id in ("patternitty-data", "patternitty-profile"):
             content = tag_content(tag_id)
             assert "</script>" not in content, f"a literal </script> in source text must not close {tag_id} early"
-        assert "\\u003c/script" in tag_content("patternity-data"), "pattern body's </script> should be escaped"
-        assert "\\u003c/script" in tag_content("patternity-profile"), "PROFILE.md's </script> should be escaped"
+        assert "\\u003c/script" in tag_content("patternitty-data"), "pattern body's </script> should be escaped"
+        assert "\\u003c/script" in tag_content("patternitty-profile"), "PROFILE.md's </script> should be escaped"
 
         # idempotency: compiling twice must not duplicate the marked section
         compile_mod.main()

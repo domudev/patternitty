@@ -1,7 +1,7 @@
 # Pattern store
 
 Patterns are **personal to the user**, not the repo: they live at
-`${PATTERNITY_HOME:-~/.patternity}/patterns/`, outside any project's git
+`${PATTERNITTY_HOME:-~/.patternitty}/patterns/`, outside any project's git
 history, so the same learned preferences follow you across repos. Files:
 
 - `<kebab-case-name>.md` — one file per pattern (the source of truth).
@@ -51,7 +51,7 @@ name: prefer-tabs
 Prefer tabs over spaces.
 ```
 
-`patternity.py add <name>` writes the same thing (with git author + agent
+`patternitty.py add <name>` writes the same thing (with git author + agent
 filled), so adding stays a one-liner whether by CLI or by hand.
 
 ## State ladder (frequency-driven, not manual approval)
@@ -62,9 +62,9 @@ filled), so adding stays a one-liner whether by CLI or by hand.
 | 2 | `recurring`  | no |
 | 3+ | `adopted`  | yes, automatically |
 
-Each time captured signal (`.patternity/signal.jsonl` in whichever project
+Each time captured signal (`.patternitty/signal.jsonl` in whichever project
 you're in, or git history) matches an existing pattern, bump `occurrences`
-and re-evaluate the state — this is the skill's job (`skills/patternity/SKILL.md`),
+and re-evaluate the state — this is the skill's job (`skills/patternitty/SKILL.md`),
 not `compile.py`, since deciding "is this the same pattern recurring" needs
 judgment. An explicit standing statement ("always...", "never...", "from now
 on...") skips straight to `adopted` regardless of occurrence count — it isn't
@@ -123,8 +123,8 @@ captured the signal (map the signal `source` — `claude-stop-hook` →
 `claude-code`, `cursor-prompt-hook` → `cursor`, `copilot-prompt-hook` →
 `copilot`; `unknown` if unclear), and `author` is the user it was learned
 from (`git config user.email`, or `anon` when there's no git identity).
-`patternity.py add` fills both automatically (author from git, agent from
-`--agent`/`$PATTERNITY_AGENT`). They're informational — not used for
+`patternitty.py add` fills both automatically (author from git, agent from
+`--agent`/`$PATTERNITTY_AGENT`). They're informational — not used for
 compilation — but let you see, in the dashboard drawer, who/what a pattern
 came from (useful once a store is shared across machines or people).
 

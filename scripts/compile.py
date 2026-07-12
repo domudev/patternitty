@@ -6,7 +6,7 @@
 """Compile adopted patterns into each tool's native format, for whichever
 project you run this from.
 
-Patterns are personal to the user (${PATTERNITY_HOME:-~/.patternity}/patterns/),
+Patterns are personal to the user (${PATTERNITTY_HOME:-~/.patternitty}/patterns/),
 not the repo — this script reads that global store but writes compiled
 output into the current working directory's project files. Deterministic
 templating, no AI. Idempotent: re-running only replaces the marked section
@@ -15,11 +15,11 @@ YAML parser dependency — the schema is small and controlled
 (patterns/_SCHEMA.md), so a hand-rolled parser is a few lines vs. a new dep.
 
 Also regenerates the store-wide visualization (index.json + index.html) in
-${PATTERNITY_HOME:-~/.patternity}/patterns/, covering every pattern at any
+${PATTERNITTY_HOME:-~/.patternitty}/patterns/, covering every pattern at any
 state — not just what got compiled for this project.
 
-Run from the project you want compiled patternity patterns applied to:
-    uv run /path/to/patternity/scripts/compile.py
+Run from the project you want compiled patternitty patterns applied to:
+    uv run /path/to/patternitty/scripts/compile.py
 """
 import json
 import re
@@ -29,8 +29,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _lib import ensure_store, in_scope, load_all, patterns_dir  # noqa: E402
 
-BEGIN = "<!-- patternity:begin -->"
-END = "<!-- patternity:end -->"
+BEGIN = "<!-- patternitty:begin -->"
+END = "<!-- patternitty:end -->"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -65,7 +65,7 @@ def load_adopted(project: str) -> tuple[list[dict], list[dict]]:
     return additive, overrides
 
 
-CLUSTER_DIR = Path("patternity")  # per-repo output dir; the "extra files" the tool configs reference
+CLUSTER_DIR = Path("patternitty")  # per-repo output dir; the "extra files" the tool configs reference
 
 
 def bullet(p: dict) -> str:
@@ -78,9 +78,9 @@ def cluster_of(p: dict) -> str:
 
 
 def write_cluster_files(additive: list[dict]) -> list[tuple[str, Path]]:
-    """Write one file per cluster under patternity/ — the single source the
+    """Write one file per cluster under patternitty/ — the single source the
     tool configs reference, instead of inlining rules into CLAUDE.md etc.
-    Owns the whole patternity/ dir: stale cluster files are removed so it
+    Owns the whole patternitty/ dir: stale cluster files are removed so it
     stays idempotent."""
     if CLUSTER_DIR.exists():
         for old in CLUSTER_DIR.glob("*.md"):
@@ -92,7 +92,7 @@ def write_cluster_files(additive: list[dict]) -> list[tuple[str, Path]]:
     for cluster, ps in sorted(by_cluster.items()):
         CLUSTER_DIR.mkdir(exist_ok=True)
         path = CLUSTER_DIR / f"{cluster}.md"
-        path.write_text(f"# {cluster}\n\n_Learned by patternity. Generated — edit patterns in the store, not here._\n\n"
+        path.write_text(f"# {cluster}\n\n_Learned by patternitty. Generated — edit patterns in the store, not here._\n\n"
                         + "\n".join(bullet(p) for p in ps) + "\n")
         written.append((cluster, path))
     return written
@@ -113,12 +113,12 @@ def replace_marked_section(path: Path, section_body: str, header: str) -> None:
 
 def write_markdown_targets(clusters: list[tuple[str, Path]]) -> list[Path]:
     # CLAUDE.md uses @-imports (Claude Code inlines them at load); AGENTS.md
-    # uses plain links. Either way the rules live in patternity/<cluster>.md,
+    # uses plain links. Either way the rules live in patternitty/<cluster>.md,
     # not inline here.
     claude_body = "\n".join(f"@{path.as_posix()}" for _, path in clusters) or "_(none adopted yet)_"
     agents_body = "\n".join(f"- [{cl}]({path.as_posix()})" for cl, path in clusters) or "_(none adopted yet)_"
-    replace_marked_section(Path("CLAUDE.md"), claude_body, "## Learned patterns (patternity)")
-    replace_marked_section(Path("AGENTS.md"), agents_body, "## Learned patterns (patternity)")
+    replace_marked_section(Path("CLAUDE.md"), claude_body, "## Learned patterns (patternitty)")
+    replace_marked_section(Path("AGENTS.md"), agents_body, "## Learned patterns (patternitty)")
     return [Path("CLAUDE.md"), Path("AGENTS.md")]
 
 
@@ -126,15 +126,15 @@ def write_cursor_rule(clusters: list[tuple[str, Path]]) -> Path:
     body = "\n".join(f"- @{path.as_posix()}" for _, path in clusters) or "_(none adopted yet)_"
     content = (
         "---\n"
-        "description: Patterns learned by patternity (see referenced files)\n"
+        "description: Patterns learned by patternitty (see referenced files)\n"
         "alwaysApply: true\n"
         "globs: **/*\n"
         "---\n\n"
-        "## Learned patterns (patternity)\n\n"
+        "## Learned patterns (patternitty)\n\n"
         "Follow the conventions in these files:\n\n"
         f"{body}\n"
     )
-    path = Path(".cursor/rules/patternity-learned.mdc")
+    path = Path(".cursor/rules/patternitty-learned.mdc")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content)
     return path
@@ -146,11 +146,11 @@ def write_copilot_instructions(clusters: list[tuple[str, Path]]) -> Path:
         "---\n"
         "applyTo: \"**\"\n"
         "---\n\n"
-        "## Learned patterns (patternity)\n\n"
+        "## Learned patterns (patternitty)\n\n"
         "Follow the conventions documented in these files:\n\n"
         f"{body}\n"
     )
-    path = Path(".github/instructions/patternity-learned.instructions.md")
+    path = Path(".github/instructions/patternitty-learned.instructions.md")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content)
     return path
@@ -217,9 +217,9 @@ def write_viz(all_patterns: list[dict]) -> list[Path]:
     html_path = patterns_dir() / "index.html"
     html_path.write_text(
         template
-        .replace("/*__PATTERNITY_DATA__*/", embed(slim))
-        .replace("/*__PATTERNITY_PROFILE__*/", embed(profile_text))
-        .replace("/*__PATTERNITY_VERSION__*/", version)
+        .replace("/*__PATTERNITTY_DATA__*/", embed(slim))
+        .replace("/*__PATTERNITTY_PROFILE__*/", embed(profile_text))
+        .replace("/*__PATTERNITTY_VERSION__*/", version)
     )
     return [json_path, html_path]
 
@@ -239,7 +239,7 @@ def main() -> None:
 
     additive, overrides = load_adopted(project)
     applied, unresolved = apply_overrides(overrides)
-    clusters = write_cluster_files(additive)   # single source: patternity/<cluster>.md
+    clusters = write_cluster_files(additive)   # single source: patternitty/<cluster>.md
     written += [p for _, p in clusters]
     written += write_markdown_targets(clusters)  # tool configs just reference them
     written += [write_cursor_rule(clusters), write_copilot_instructions(clusters)]

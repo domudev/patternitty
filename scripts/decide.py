@@ -14,7 +14,7 @@ decision and lets the automatic state ladder take over again.
 Usage (token form, as the viz emits it):
     uv run scripts/decide.py accept:uv-pref reject:tabs-not-spaces clear:foo
 
-Edits the `decision` frontmatter field in ${PATTERNITY_HOME:-~/.patternity}/
+Edits the `decision` frontmatter field in ${PATTERNITTY_HOME:-~/.patternitty}/
 patterns/<name>.md. Re-run compile.py afterwards to reflect it.
 """
 import sys
@@ -28,7 +28,7 @@ VERBS = {"accept": "accepted", "reject": "rejected", "clear": None}
 
 def set_decision(path: Path, value: str | None) -> None:
     """Set/clear the `decision` field. Thin wrapper over the shared frontmatter
-    editor so decide.py and patternity.py `set` never drift apart."""
+    editor so decide.py and patternitty.py `set` never drift apart."""
     set_field(path, "decision", value)
 
 

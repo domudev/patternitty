@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="viz/logo.svg" width="52" alt="patternity">
+  <img src="viz/logo.svg" width="52" alt="patternitty">
   <br><br>
-  <b>patternity</b>
+  <b>patternitty</b>
   <br>
   <sub>DRY for your preferences. Scream at your agent once; it does the nagging from then on.</sub>
 </p>
@@ -17,12 +17,12 @@ It gets worse. Half the time you can't even be bothered to *tell* your agent
 to update its own instructions, let alone edit them yourself. So you just
 re-correct it next session. And the session after. Forever.
 
-patternity ends the loop. It watches the corrections and preferences you keep
+patternitty ends the loop. It watches the corrections and preferences you keep
 repeating, waits until it's sure you mean it, then quietly teaches every AI
 assistant you use (Claude Code, Cursor, Copilot) to stop making you say it
 again.
 
-The arrangement is simple: you keep being lazy, patternity keeps the notes.
+The arrangement is simple: you keep being lazy, patternitty keeps the notes.
 Nobody hand-maintains a `CLAUDE.md` ever again. You're welcome.
 
 ## What you get
@@ -48,21 +48,21 @@ Nobody hand-maintains a `CLAUDE.md` ever again. You're welcome.
 Add the marketplace:
 
 ```
-/plugin marketplace add domudev/patternity
+/plugin marketplace add domudev/patternitty
 ```
 
 Install the plugin:
 
 ```
-/plugin install patternity@patternity
+/plugin install patternitty@patternitty
 ```
 
-Then just work. After a few sessions, run `/patternity` and watch it write
+Then just work. After a few sessions, run `/patternitty` and watch it write
 the `CLAUDE.md` you were never going to.
 
 ### Cursor
 
-From your patternity clone, wire the hooks into a project:
+From your patternitty clone, wire the hooks into a project:
 
 ```
 scripts/install.sh /path/to/your/project cursor
@@ -92,6 +92,6 @@ git diff you can revert. Full walkthrough: **[docs/how-it-works.md](docs/how-it-
 - **[How it works](docs/how-it-works.md)**: capture, the noticed/recurring/adopted ladder, compilation
 - **[Install & hosts](docs/install.md)**: Claude Code, Cursor, Copilot, git-history mining, backing up your store
 - **[Dashboard](docs/dashboard.md)**: the board, accept/reject, the profile panel
-- **[CLI & server](docs/cli.md)**: `patternity.py` commands and the localhost API
+- **[CLI & server](docs/cli.md)**: `patternitty.py` commands and the localhost API
 - **[Patterns & the store](docs/patterns.md)**: schema, two tiers, scoping, clusters, provenance, overrides
 - **[Development](docs/development.md)**: tests, conventional commits, releases, repo layout

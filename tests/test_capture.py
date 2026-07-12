@@ -35,7 +35,7 @@ def main() -> None:
         meta_tx.write_text(
             json.dumps({"message": {"role": "user", "content": [{"text": "real earlier message"}]}}) + "\n"
             + json.dumps({"message": {"role": "assistant", "content": [{"text": "reply"}]}}) + "\n"
-            + json.dumps({"isMeta": True, "message": {"role": "user", "content": [{"text": "Run `uv run scripts/patternity.py dashboard`"}]}}) + "\n"
+            + json.dumps({"isMeta": True, "message": {"role": "user", "content": [{"text": "Run `uv run scripts/patternitty.py dashboard`"}]}}) + "\n"
             + json.dumps({"message": {"role": "assistant", "content": [{"text": "opening dashboard"}]}}) + "\n"
         )
         assert capture_mod.build_record({"transcript_path": str(meta_tx), "cwd": tmp}) is None, \

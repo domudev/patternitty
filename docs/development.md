@@ -10,7 +10,7 @@ for t in tests/test_*.py; do uv run "$t"; done
 
 - `test_compile` — adopted patterns compile, non-adopted don't, scoping,
   overrides, two-tier merge, idempotency, `</script>` escaping
-- `test_patternity` — BM25 ranking, regex, add/bump/set, provenance
+- `test_patternitty` — BM25 ranking, regex, add/bump/set, provenance
 - `test_decide` — accept/reject/clear frontmatter surgery
 - `test_capture` — the three host payload shapes + meta/junk filtering
 
@@ -38,15 +38,15 @@ Merging that PR tags `vX.Y.Z` and cuts the GitHub Release.
 
 So the release flow is: **merge conventional PRs → merge the release PR when
 you want to ship.** No manual version bumping or tagging. Consumers can pin a
-version via the marketplace `source` ref (`domudev/patternity#vX.Y.Z`).
+version via the marketplace `source` ref (`domudev/patternitty#vX.Y.Z`).
 
 ## Repo layout
 
-- `skills/patternity/SKILL.md` — the distillation/promotion logic (the skill)
-- `commands/` — `/patternity:compile`, `/patternity:dashboard` (distillation is the `patternity` skill, `/patternity`)
+- `skills/patternitty/SKILL.md` — the distillation/promotion logic (the skill)
+- `commands/` — `/patternitty:compile`, `/patternitty:dashboard` (distillation is the `patternitty` skill, `/patternitty`)
 - `hooks/` — the shared capture hook + per-host hook configs
-- `scripts/` — `patternity.py` (CLI + server), `compile.py`, `mine_git_history.py`, `decide.py`, shared `_lib.py`; plus `install.sh` and `init_store.sh`
-- `patterns/` — `_SCHEMA.md` + reference example (the real store is `${PATTERNITY_HOME:-~/.patternity}/patterns/`)
+- `scripts/` — `patternitty.py` (CLI + server), `compile.py`, `mine_git_history.py`, `decide.py`, shared `_lib.py`; plus `install.sh` and `init_store.sh`
+- `patterns/` — `_SCHEMA.md` + reference example (the real store is `${PATTERNITTY_HOME:-~/.patternitty}/patterns/`)
 - `viz/` — `template.html` (compiled into the store as `index.html`) + `logo.svg`
 - `.claude-plugin/` — `plugin.json` + `marketplace.json`
 - `tests/` — the four self-checks
