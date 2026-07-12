@@ -3,7 +3,7 @@
   <br><br>
   <b>DRY for your preferences.</b>
   <br>
-  <sub>Say it once; it handles the nagging, not the knowing.</sub>
+  <sub>Scream at your agent once; patternity does the nagging from then on.</sub>
 </p>
 
 # You are lazy. That's the feature.
