@@ -1,6 +1,6 @@
 {
   "name": "patternitty",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Learns coding patterns from corrections, confirmations, and commit history, and distills them into reviewable agent instructions.",
   "author": {
     "name": "Dominik Müller",
