@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/domudev/patternitty/compare/v0.6.0...v0.6.1) (2026-07-13)
+
+
+### Bug Fixes
+
+* repair the signal pipeline (capture at root, distill, show on dashboard) ([#9](https://github.com/domudev/patternitty/issues/9)) ([314b916](https://github.com/domudev/patternitty/commit/314b9167f026ac819e085e634639ffd15c3b93cb))
+
 ## [0.6.0](https://github.com/domudev/patternitty/compare/v0.5.0...v0.6.0) (2026-07-12)
 
 
