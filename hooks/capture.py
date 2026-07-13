@@ -21,9 +21,24 @@ other 3.10+ syntax.
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 import time
 from pathlib import Path
+
+
+def repo_root(start: str) -> str:
+    """Git top level for `start`, so signal always lands at the repo root — not
+    scattered into a per-subdir .patternitty/ that the store never reads.
+    Falls back to `start` when git is missing or it isn't a repo. Kept in sync
+    with scripts/_lib.py:repo_root (this hook can't import it — it runs on the
+    machine's bare python3, no uv, no sys.path to the scripts dir)."""
+    try:
+        out = subprocess.run(["git", "-C", start, "rev-parse", "--show-toplevel"],
+                             capture_output=True, timeout=5).stdout.decode().strip()
+        return out or start
+    except Exception:
+        return start
 
 
 # junk we must never treat as user signal: slash-command / skill / tool /
@@ -99,7 +114,7 @@ def main() -> int:
             return 0
         record["ts"] = time.time()
 
-        out_dir = Path(record.pop("cwd") or ".") / ".patternitty"
+        out_dir = Path(repo_root(record.pop("cwd") or ".")) / ".patternitty"
         out_dir.mkdir(exist_ok=True)
         with open(out_dir / "signal.jsonl", "a") as f:
             f.write(json.dumps(record) + "\n")

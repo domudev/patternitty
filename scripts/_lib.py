@@ -13,17 +13,33 @@ def patterns_dir() -> Path:
     return Path(home) / "patterns"
 
 
-def repo_patterns_dir() -> Path | None:
-    """The per-REPO store: team/project conventions committed with the code,
-    at <git-root>/.patternitty/patterns/. None when not inside a git repo.
-    (Signal lives at <git-root>/.patternitty/signal.jsonl and stays gitignored;
-    only patterns/ is meant to be committed — see README.)"""
+def repo_root() -> Path | None:
+    """The current git repository's top level, or None outside a repo. The one
+    canonical answer to "where's the project root": signal writers and the
+    pattern store must resolve it the same way, or signals written from a
+    subdir land somewhere the store never looks."""
     try:
         root = subprocess.run(["git", "rev-parse", "--show-toplevel"], check=False,
                               capture_output=True, text=True, timeout=5).stdout.strip()
     except Exception:
         root = ""
-    return Path(root) / ".patternitty" / "patterns" if root else None
+    return Path(root) if root else None
+
+
+def repo_patterns_dir() -> Path | None:
+    """The per-REPO store: team/project conventions committed with the code,
+    at <git-root>/.patternitty/patterns/. None when not inside a git repo.
+    (Signal lives at <git-root>/.patternitty/signal.jsonl and stays gitignored;
+    only patterns/ is meant to be committed — see README.)"""
+    root = repo_root()
+    return root / ".patternitty" / "patterns" if root else None
+
+
+def signal_file() -> Path:
+    """Where captured signal lands and is read from: <git-root>/.patternitty/
+    signal.jsonl, or ./.patternitty/signal.jsonl outside a repo. Gitignored.
+    The hook appends, mine_git_history.py appends, the skill + dashboard read."""
+    return (repo_root() or Path(".")) / ".patternitty" / "signal.jsonl"
 
 
 def git_author() -> str:

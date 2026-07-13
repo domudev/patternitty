@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _lib import ensure_store, in_scope, load_all, patterns_dir  # noqa: E402
+from _lib import ensure_store, in_scope, load_all, patterns_dir, signal_file  # noqa: E402
 
 BEGIN = "<!-- patternitty:begin -->"
 END = "<!-- patternitty:end -->"
@@ -187,10 +187,28 @@ def write_overrides_report(unresolved: list[str]) -> None:
     replace_marked_section(Path("AGENTS.md"), body, "## Overrides (needs manual check)")
 
 
+def load_signals(limit: int = 40) -> list[dict]:
+    """Recent captured signal for the repo compile is run from, newest first —
+    the raw feed the skill distills into patterns, surfaced on the dashboard so
+    the capture log isn't a write-only black box. Best-effort: a malformed line
+    is skipped, a missing file yields []."""
+    path = signal_file()
+    if not path.exists():
+        return []
+    rows = []
+    for line in path.read_text().splitlines():
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    rows.sort(key=lambda r: r.get("ts", 0), reverse=True)
+    return [{k: r.get(k, "") for k in ("source", "user", "assistant", "ts")} for r in rows[:limit]]
+
+
 def write_viz(all_patterns: list[dict]) -> list[Path]:
     """Regenerate the whole-store visualization: index.json (raw data) and
-    index.html (the same data + PROFILE.md embedded, so it opens via file://
-    with no server and no fetch/CORS gotcha)."""
+    index.html (the same data + PROFILE.md + recent signal embedded, so it
+    opens via file:// with no server and no fetch/CORS gotcha)."""
     slim = [
         {k: p.get(k, "") for k in ("name", "type", "state", "occurrences", "cluster", "decision", "agent", "author", "tier", "applies_to", "target", "body")}
         for p in all_patterns
@@ -219,6 +237,7 @@ def write_viz(all_patterns: list[dict]) -> list[Path]:
         template
         .replace("/*__PATTERNITTY_DATA__*/", embed(slim))
         .replace("/*__PATTERNITTY_PROFILE__*/", embed(profile_text))
+        .replace("/*__PATTERNITTY_SIGNALS__*/", embed(load_signals()))
         .replace("/*__PATTERNITTY_VERSION__*/", version)
     )
     return [json_path, html_path]

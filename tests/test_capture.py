@@ -59,7 +59,23 @@ def main() -> None:
 
         assert capture_mod.build_record({"unrelated": "field"}) is None
 
-        print("all checks passed")
+    # repo_root resolves a subdir to the repo top level (so signal always lands
+    # at the root, not scattered per-subdir); falls back to the input outside a
+    # repo. realpath to dodge macOS /var -> /private/var symlinking.
+    import os
+    import subprocess
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = os.path.realpath(tmp)
+        subprocess.run(["git", "init", "-q", tmp], check=True)
+        sub = Path(tmp) / "apps" / "api"
+        sub.mkdir(parents=True)
+        assert capture_mod.repo_root(str(sub)) == tmp, "subdir must resolve to repo root"
+
+    with tempfile.TemporaryDirectory() as nogit:
+        nogit = os.path.realpath(nogit)
+        assert capture_mod.repo_root(nogit) == nogit, "outside a repo, fall back to input"
+
+    print("all checks passed")
 
 
 if __name__ == "__main__":

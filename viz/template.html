@@ -175,6 +175,21 @@
   .rejected .cards { margin-top: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   @media (max-width: 760px) { .rejected .cards { grid-template-columns: 1fr; } }
 
+  /* signals feed — the raw capture log (hooks + git mining) the skill distills
+     into patterns. Collapsed: it's noisy, and it's here for transparency, not
+     triage. Same disclosure chrome as the rejected tray. */
+  .signals { margin: 0 34px 20px; }
+  .signals summary { cursor: pointer; color: var(--text-muted); font-size: 12px; padding: 6px 0; user-select: none; display: flex; align-items: center; gap: 7px; list-style: none; }
+  .signals summary::-webkit-details-marker { display: none; }
+  .signals summary::before { content: "›"; font-size: 15px; line-height: 1; transition: transform .15s ease; }
+  .signals[open] summary::before { transform: rotate(90deg); }
+  .signals .feed { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; max-height: 440px; overflow-y: auto; }
+  .sig { border: 1px solid var(--border); border-radius: var(--radius); background: color-mix(in srgb, var(--card) 55%, transparent); padding: 9px 11px; }
+  .sig .s-meta { display: flex; justify-content: space-between; gap: 10px; font-size: 10.5px; color: var(--text-muted); margin-bottom: 4px; }
+  .sig .s-src { text-transform: uppercase; letter-spacing: .04em; }
+  .sig .s-user { font-size: 12.5px; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; }
+  .sig .s-asst { font-size: 11.5px; color: var(--text-secondary); margin-top: 5px; padding-left: 9px; border-left: 2px solid var(--border-strong); white-space: pre-wrap; word-break: break-word; }
+
   /* pending-decisions tray — the bridge to the store. The viz can't write
      files, so it hands over the exact decide.py command to run. */
   .tray {
@@ -265,6 +280,10 @@
   <div class="col" data-state="recurring"><h2>Recurring <span class="n"></span></h2><div class="cards"></div></div>
   <div class="col" data-state="adopted"><h2>Adopted <span class="n"></span></h2><div class="cards"></div></div>
 </div>
+<details class="signals" id="signals" hidden>
+  <summary></summary>
+  <div class="feed"></div>
+</details>
 <details class="rejected" id="rejected" hidden>
   <summary></summary>
   <div class="cards"></div>
@@ -298,9 +317,11 @@
 </div>
 <script id="patternitty-data" type="application/json">/*__PATTERNITTY_DATA__*/</script>
 <script id="patternitty-profile" type="application/json">/*__PATTERNITTY_PROFILE__*/</script>
+<script id="patternitty-signals" type="application/json">/*__PATTERNITTY_SIGNALS__*/</script>
 <script>
   const DATA = JSON.parse(document.getElementById('patternitty-data').textContent || '[]');
   const PROFILE_MD = JSON.parse(document.getElementById('patternitty-profile').textContent || '""');
+  const SIGNALS = JSON.parse(document.getElementById('patternitty-signals').textContent || '[]');
   const PAGE_SIZE = 6;
   const shown = { noticed: PAGE_SIZE, recurring: PAGE_SIZE, adopted: PAGE_SIZE };
   let query = '';
@@ -494,6 +515,33 @@
     panel.hidden = !(md || '').trim();
   }
 
+  function relTime(ts) {
+    if (!ts) return '';
+    const s = Math.max(0, Date.now() / 1000 - ts);
+    for (const [sec, l] of [[86400, 'd'], [3600, 'h'], [60, 'm']]) {
+      if (s >= sec) return Math.floor(s / sec) + l + ' ago';
+    }
+    return 'just now';
+  }
+  function renderSignals() {
+    const panel = document.getElementById('signals');
+    if (!SIGNALS.length) { panel.hidden = true; return; }
+    panel.hidden = false;
+    panel.querySelector('summary').textContent =
+      `Recent signals (${SIGNALS.length}) — raw capture, not yet distilled`;
+    panel.querySelector('.feed').innerHTML = SIGNALS.map(s => {
+      const src = String(s.source || '').replace('claude-stop-hook', 'claude code')
+        .replace('cursor-prompt-hook', 'cursor').replace('copilot-prompt-hook', 'copilot')
+        .replace('git-history', 'git history');
+      const user = escapeHtml((s.user || '').slice(0, 240));
+      const asst = s.assistant
+        ? `<div class="s-asst">${escapeHtml(s.assistant.slice(0, 160))}</div>` : '';
+      return `<div class="sig"><div class="s-meta"><span class="s-src">${escapeHtml(src)}</span>`
+        + `<span class="s-time">${relTime(s.ts)}</span></div>`
+        + `<div class="s-user">${user}</div>${asst}</div>`;
+    }).join('');
+  }
+
   const detail = document.getElementById('detail');
   let openIndex = -1;
   function openDetail(index) {
@@ -533,6 +581,7 @@
   document.getElementById('d-reject').addEventListener('click', () => { setDecision(openIndex, 'rejected'); detail.close(); });
 
   renderProfile(PROFILE_MD);
+  renderSignals();
   render();
 </script>
 </body>

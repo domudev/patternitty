@@ -24,6 +24,21 @@ task-specific asks, and anything already fully explicit. When unsure, leave it
 at `noticed` rather than calcify a wrong rule (accept/reject and the git diff
 are the safety net).
 
+## Distilling captured signal
+
+The live conversation is one source; the other is the **capture log** the hooks
+append to `<git-root>/.patternitty/signal.jsonl` (one JSON object per turn:
+`user`, `assistant`, `source`, `ts`). It's the safety net for preferences
+stated when this skill wasn't invoked — but it does nothing until you read it.
+At session start and on `/patternitty`, drain it:
+
+1. Read `<git-root>/.patternitty/state.json` → `last_distilled_ts` (0 if absent).
+2. Read `signal.jsonl`; consider only rows with `ts > last_distilled_ts`.
+3. Apply the same restraint as live capture — durable prefs become
+   `patternitty.py add`/`bump`, one-offs are dropped.
+4. Write the max `ts` you processed back to `state.json` as `last_distilled_ts`,
+   so the same rows are never re-distilled.
+
 ## Store & tools
 
 Personal store: `${PATTERNITTY_HOME:-~/.patternitty}/patterns/`. Team store (if

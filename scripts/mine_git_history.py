@@ -10,10 +10,15 @@ Run from inside the project you want patternitty to learn from:
 """
 import json
 import subprocess
+import sys
 from pathlib import Path
 
-STATE_FILE = Path(".patternitty/state.json")
-SIGNAL_FILE = Path(".patternitty/signal.jsonl")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _lib import repo_root  # noqa: E402
+
+_ROOT = repo_root() or Path(".")
+STATE_FILE = _ROOT / ".patternitty" / "state.json"
+SIGNAL_FILE = _ROOT / ".patternitty" / "signal.jsonl"
 
 
 def git(*args: str) -> str:
@@ -21,7 +26,7 @@ def git(*args: str) -> str:
 
 
 def main() -> None:
-    Path(".patternitty").mkdir(exist_ok=True)
+    SIGNAL_FILE.parent.mkdir(parents=True, exist_ok=True)
     state = json.loads(STATE_FILE.read_text()) if STATE_FILE.exists() else {}
     since_sha = state.get("last_mined_sha")
 
